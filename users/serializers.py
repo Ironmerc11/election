@@ -1,7 +1,9 @@
+from dataclasses import field
 from urllib import response
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from rest_framework import serializers, status, views, permissions, generics
+from rest_framework.permissions import IsAdminUser
 #from django.contrib.auth.models import User
 # from users.models import User
 from rest_framework.validators import UniqueValidator
@@ -26,15 +28,17 @@ class RegisterAdminSerializer(serializers.ModelSerializer):
             validators=[UniqueValidator(queryset=User.objects.all())]
             )
 
-    password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
+    password = serializers.CharField(write_only=True, required=True,
+                                     validators=[validate_password]
+                                     )
 
     class Meta:
         model = User
-        fields = ('username', 'password', 'email')
-        extra_kwargs = {
-            'username': {'required': False},
-            # 'last_name': {'required': True}
-        }
+        fields = ('email','password')
+        # extra_kwargs = {
+        #     'username': {'required': False},
+        #     # 'last_name': {'required': True}
+        # }
 
     def create(self, validated_data):
         user = User.objects.create(
@@ -46,9 +50,8 @@ class RegisterAdminSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])
         user.is_staff = True
         user.save()
-
+        # send email
         return user
-        # return Response({"success":"Admin Successfully created"}, status=status.HTTP_201_CREATED)
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -59,53 +62,78 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         # Add custom claims
         token['username'] = user.username
         return token
+    
 
-class EmailVerificationSerializer(serializers.ModelSerializer):
-    token = serializers.CharField(max_length=555)
 
+class UserSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(
+            required=True,
+            validators=[UniqueValidator(message='An account with this email exist', queryset=User.objects.all())]
+            )
+
+    password = serializers.CharField(write_only=True, required=True,
+                                     validators=[validate_password]
+                                     )
+    
     class Meta:
         model = User
-        fields = ['token']
+        fields = ['username', 'password', 'email', 'id', 'first_name', 'last_name']
+        
+        
+    def update(self, instance, validated_data):
+        super().update(instance, validated_data)
+        instance.set_password(validated_data['password'])
+        instance.save()
+        return instance
+        
 
 
-class ResetPasswordEmailRequestSerializer(serializers.Serializer):
-    email = serializers.EmailField(min_length=2)
+# class EmailVerificationSerializer(serializers.ModelSerializer):
+#     token = serializers.CharField(max_length=555)
 
-    redirect_url = serializers.CharField(max_length=500, required=False)
+#     class Meta:
+#         model = User
+#         fields = ['token']
 
-    class Meta:
-        fields = ['email']
+
+# class ResetPasswordEmailRequestSerializer(serializers.Serializer):
+#     email = serializers.EmailField(min_length=2)
+
+#     redirect_url = serializers.CharField(max_length=500, required=False)
+
+#     class Meta:
+#         fields = ['email']
 
 
-class SetNewPasswordSerializer(serializers.Serializer):
-    password = serializers.CharField(
-        min_length=6, max_length=68, write_only=True)
-    token = serializers.CharField(
-        min_length=1, write_only=True)
-    uidb64 = serializers.CharField(
-        min_length=1, write_only=True)
+# class SetNewPasswordSerializer(serializers.Serializer):
+#     password = serializers.CharField(
+#         min_length=6, max_length=68, write_only=True)
+#     token = serializers.CharField(
+#         min_length=1, write_only=True)
+#     uidb64 = serializers.CharField(
+#         min_length=1, write_only=True)
 
-    class Meta:
-        fields = ['password', 'token', 'uidb64']
+#     class Meta:
+#         fields = ['password', 'token', 'uidb64']
 
-    def validate(self, attrs):
-        try:
-            password = attrs.get('password')
-            token = attrs.get('token')
-            uidb64 = attrs.get('uidb64')
+#     def validate(self, attrs):
+#         try:
+#             password = attrs.get('password')
+#             token = attrs.get('token')
+#             uidb64 = attrs.get('uidb64')
 
-            id = force_str(urlsafe_base64_decode(uidb64))
-            user = User.objects.get(id=id)
-            if not PasswordResetTokenGenerator().check_token(user, token):
-                raise AuthenticationFailed('The reset link is invalid', 401)
+#             id = force_str(urlsafe_base64_decode(uidb64))
+#             user = User.objects.get(id=id)
+#             if not PasswordResetTokenGenerator().check_token(user, token):
+#                 raise AuthenticationFailed('The reset link is invalid', 401)
 
-            user.set_password(password)
-            user.save()
+#             user.set_password(password)
+#             user.save()
 
-            return (user)
-        except Exception as e:
-            raise AuthenticationFailed('The reset link is invalid', 401)
-        return super().validate(attrs)
+#             return (user)
+#         except Exception as e:
+#             raise AuthenticationFailed('The reset link is invalid', 401)
+#         return super().validate(attrs)
 
 
 class LogoutSerializer(serializers.Serializer):
