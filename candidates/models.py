@@ -6,10 +6,15 @@ class Candidate(models.Model):
         ('Male', 'Male'),
         ('Female', 'Female'),
         ]
-    # QUALIFICATION_CHOICES = [
-    #     ('Doctorate Degree','Doctorate Degree'),
-    #     ('')
-    # ]
+    QUALIFICATION_CHOICES = [
+        ('Doctorate Degree','Doctorate Degree'),
+        ('Masters Degree', 'Masters Degree'),
+        ('Honours Degree','Honours Degree'),
+        ('Bachelors Degree','Bachelors Degree'),
+        ('National Diploma','National Diploma'),
+        ('Higher Certificate','Higher Certificate')
+    ]
+
     year = models.CharField(max_length=4)
     state = models.CharField(max_length=30)
     state_code = models.CharField(max_length=20)
@@ -29,7 +34,7 @@ class Candidate(models.Model):
     name = models.CharField(max_length=250)
     age = models.PositiveIntegerField()
     gender = models.CharField(max_length=6, choices=GENDER_CHOICES)
-    qualifications = ArrayField(models.CharField(max_length=50, blank=True))
+    qualifications = models.CharField(max_length=100, choices=QUALIFICATION_CHOICES)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
