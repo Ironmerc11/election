@@ -1,0 +1,24 @@
+from .models import Candidate
+from django_filters import rest_framework as filters
+
+class CandidateFilter(filters.FilterSet):
+    location__year = filters.CharFilter(lookup_expr='icontains')
+    location__state = filters.CharFilter(lookup_expr='icontains')
+    location__state_code = filters.CharFilter(lookup_expr='icontains')
+    location__senatorial_district = filters.CharFilter(lookup_expr='icontains')
+    location__senatorial_district_code = filters.CharFilter(lookup_expr='icontains')
+    location__federal_constituency = filters.CharFilter(lookup_expr='icontains')
+    location__federal_constituency__code = filters.CharFilter(lookup_expr='icontains')
+    location__state_constituency = filters.CharFilter(lookup_expr='icontains')
+    location__state_constituency_code = filters.CharFilter(lookup_expr='icontains')
+    location__lga = filters.CharFilter(lookup_expr='icontains')
+    location__lga_code = filters.CharFilter(lookup_expr='icontains')
+    location__ward = filters.CharFilter(lookup_expr='icontains')
+    location__ward_code = filters.CharFilter(lookup_expr='icontains')
+    location__polling_unit = filters.CharFilter(lookup_expr='icontains')
+    location__polling_unit_code = filters.CharFilter(lookup_expr='icontains')
+    
+
+    class Meta:
+        model = Candidate
+        fields = ['position', 'name', 'age', 'gender', 'qualifications', 'location']
