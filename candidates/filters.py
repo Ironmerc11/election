@@ -17,8 +17,14 @@ class CandidateFilter(filters.FilterSet):
     location__ward_code = filters.CharFilter(lookup_expr='icontains')
     location__polling_unit = filters.CharFilter(lookup_expr='icontains')
     location__polling_unit_code = filters.CharFilter(lookup_expr='icontains')
+    party = filters.CharFilter(lookup_expr='icontains')
+    name = filters.CharFilter(lookup_expr='icontains')
+    position__year = filters.CharFilter(lookup_expr='icontains')
+    position__position__name = filters.CharFilter(lookup_expr='icontains')
+    
+    
     
 
     class Meta:
         model = Candidate
-        fields = ['position', 'name', 'age', 'gender', 'qualifications', 'location']
+        fields = ['name', 'age', 'gender', 'qualifications', 'location', 'party', 'position']
