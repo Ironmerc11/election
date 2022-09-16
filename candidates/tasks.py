@@ -11,7 +11,7 @@ def add_candidates_to_db(saved_file_id, parties, year):
   
     file = CandidateFile.objects.get(id=saved_file_id)
     try:
-        reader = pd.read_excel(f'{settings.BASE_DIR}{file.file.url}')
+        reader = pd.read_excel(file.file.url)
         
         
         # if file_extension == '.xlsx':   

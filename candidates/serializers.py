@@ -11,7 +11,7 @@ class CandidateSerializer(serializers.ModelSerializer):
     
     def to_representation(self, instance):
         rep = super().to_representation(instance)
-        # rep["location"] = LocationSerializer(instance.location.all(), many=True).data
+        rep["location"] = LocationSerializer(instance.location.all(), many=True).data
         rep["position"] = RunningPositionSerializer(instance.position.all(), many=True).data
         return rep
         

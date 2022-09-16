@@ -1,5 +1,6 @@
 from django.db import models
-from django.contrib.postgres.fields import ArrayField
+from cloudinary.models import CloudinaryField
+
 
 class Location(models.Model):    
     year = models.CharField(max_length=4, null=True)
@@ -72,7 +73,7 @@ class CandidateFile(models.Model):
         ('Uploading','Uploading'),
     ]
     uploaded_at = models.DateTimeField(auto_now_add=True)
-    file = models.FileField()
+    file = CloudinaryField(resource_type='raw')
     active = models.BooleanField(default=True)
     status = models.CharField(choices=UPLOAD_CHOICES, max_length=50, null=True)
     message = models.CharField(max_length=300, null=True)

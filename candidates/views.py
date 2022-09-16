@@ -1,16 +1,17 @@
 
-import json
-from rest_framework import viewsets, status
-from .models import Candidate, Location, RunningPosition, Position, CandidateFile
-from .serializers import CandidateSerializer, FileUploadSerializer
-from .filters import CandidateFilter
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import generics
-import pandas as pd
-from rest_framework.response import Response
 import os
-from django.conf import settings
+
+import pandas as pd
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import generics, status, viewsets
+from rest_framework.response import Response
+
+from .filters import CandidateFilter
+from .models import (Candidate, CandidateFile)
+from .serializers import CandidateSerializer, FileUploadSerializer
 from .tasks import add_candidates_to_db
+
+
 class CandidateViewset(viewsets.ModelViewSet):
     queryset = Candidate.objects.all()
     serializer_class = CandidateSerializer
@@ -72,9 +73,6 @@ class FileUpload(generics.CreateAPIView):
         
         saved_file = CandidateFile.objects.create(file=file)
         saved_file.status = 'Uploading'
-        print(f'{settings.BASE_DIR}/media/{saved_file.file.url}')
-        
-        
         saved_file.save()
         add_candidates_to_db.delay(saved_file.id, parties, year)
             
