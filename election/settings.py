@@ -14,6 +14,7 @@ import environ
 import os
 from pathlib import Path
 from datetime import timedelta
+import django_heroku 
 env = environ.Env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -181,3 +182,4 @@ STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+django_heroku.settings(locals())
