@@ -32,7 +32,9 @@ SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DEBUG')
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'kycs-staging.herokuapp.com'
+]
 
 
 # Raises Django's ImproperlyConfigured
@@ -56,11 +58,13 @@ INSTALLED_APPS = [
     # apps
     'users',
     "candidates",
+    "corsheaders"
     
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+        "corsheaders.middleware.CorsMiddleware",
     "django.middleware.gzip.GZipMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -191,6 +195,8 @@ cloudinary.config(
   api_key = env("CLOUDINARY_API_KEY"), 
   api_secret = env("CLOUDINARY_SECRET_KEY") 
 )
+
+CORS_ORIGIN_ALLOW_ALL = True
 
 if env('HEROKU') == True:
     import django_heroku 
