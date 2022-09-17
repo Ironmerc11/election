@@ -56,3 +56,4 @@ vine==5.0.0
 wcwidth==0.2.5
 whitenoise==6.2.0
 wrapt==1.14.1
+backports.zoneinfo==0.2.1;python_version<"3.9"
