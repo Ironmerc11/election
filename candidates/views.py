@@ -2,12 +2,16 @@
 import os
 
 import pandas as pd
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+from django.views.decorators.vary import vary_on_cookie, vary_on_headers
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, status, viewsets
 from rest_framework.response import Response
+from users.permissions import IsAdminOrSuperUser
 
 from .filters import CandidateFilter
-from .models import (Candidate, CandidateFile)
+from .models import Candidate, CandidateFile
 from .serializers import CandidateSerializer, FileUploadSerializer
 from .tasks import add_candidates_to_db
 
@@ -19,9 +23,16 @@ class CandidateViewset(viewsets.ModelViewSet):
     filterset_fields = '__all__'
     filterset_class = CandidateFilter
     
+    # With cookie: cache requested url for each user for 2 hours
+    @method_decorator(cache_page(60*60*5))
+    @method_decorator(vary_on_cookie)
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+    
 
 class ConfirmFileUpload(generics.CreateAPIView):
     serializer_class = FileUploadSerializer
+    permission_classes = [IsAdminOrSuperUser]
     
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -47,6 +58,8 @@ class ConfirmFileUpload(generics.CreateAPIView):
 
 class FileUpload(generics.CreateAPIView):
     serializer_class = FileUploadSerializer
+    permission_classes = [IsAdminOrSuperUser]
+    
     
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
