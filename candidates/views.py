@@ -1,4 +1,5 @@
 
+from asyncore import poll
 import os
 
 import pandas as pd
@@ -6,7 +7,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie, vary_on_headers
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import generics, status, viewsets
+from rest_framework import generics, status, viewsets, views
 from rest_framework.response import Response
 from users.permissions import IsAdminOrSuperUser
 
@@ -14,6 +15,7 @@ from .filters import CandidateFilter
 from .models import Candidate, CandidateFile
 from .serializers import CandidateSerializer,CandidateFileSerializer, FileUploadSerializer, CandidateWithoutLocationSerializer
 from .tasks import add_candidates_to_db
+from .filter_select_fields import get_filter_data
 
 
 class CandidateViewset(viewsets.ModelViewSet):
@@ -96,9 +98,26 @@ class FileUpload(generics.CreateAPIView):
         return Response({"message": "Upload successful, the data is being processed in the background"},
                         status.HTTP_200_OK)
 
-
-
 class CandidateFiles(viewsets.ModelViewSet):
     queryset = CandidateFile.objects.all()
     serializer_class = CandidateFileSerializer
+
+
+class GetFilterData(views.APIView):
     
+    
+    def get(self, request, format=None):
+        """
+            Get filter data from the db
+        """
+        state = request.query_params.get('state')
+        senatorial_district = request.query_params.get('senatorial_district')
+        federal_constituency = request.query_params.get('federal_constituency')
+        state_constituency = request.query_params.get('state_constituency')
+        lga = request.query_params.get('lga')
+        ward = request.query_params.get('ward')
+        polling_unit = request.query_params.get('polling_unit')
+        
+        data = get_filter_data(request.query_params.get('filter'),state,senatorial_district,federal_constituency,
+                               state_constituency, lga, ward, polling_unit)
+        return Response(data)
