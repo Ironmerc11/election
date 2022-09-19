@@ -4,6 +4,7 @@ from django.urls import reverse
 
 class User(AbstractUser):
     verified = models.BooleanField(default=False)
+    deleted = models.BooleanField(default=False)
     verified_date = models.DateTimeField(null=True, blank=True)
     last_modified = models.DateTimeField(auto_now=True)
 

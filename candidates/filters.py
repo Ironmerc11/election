@@ -21,10 +21,12 @@ class CandidateFilter(filters.FilterSet):
     name = filters.CharFilter(lookup_expr='icontains')
     position__year = filters.CharFilter(lookup_expr='icontains')
     position__position__name = filters.CharFilter(lookup_expr='icontains')
+    min_age = filters.NumberFilter(field_name="age", lookup_expr='gte')
+    max_age = filters.NumberFilter(field_name="age", lookup_expr='lte')
     
     
     
 
     class Meta:
         model = Candidate
-        fields = ['name', 'age', 'gender', 'qualifications', 'location', 'party', 'position']
+        fields = ['name', 'min_age', 'max_age' ,'gender', 'qualifications', 'location', 'party', 'position']

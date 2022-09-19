@@ -199,7 +199,7 @@ cloudinary.config(
 )
 
 CORS_ORIGIN_ALLOW_ALL = True
-
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240 # higher than the count of fields
 AUTHENTICATION_BACKENDS = ['users.auth_backend.EmailBackend']
 if env('HEROKU') == True:
     import django_heroku 
