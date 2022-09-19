@@ -1,4 +1,4 @@
-from .models import Candidate, Location, RunningPosition, Position
+from .models import Candidate, Location, RunningPosition, Position, CandidateFile
 from rest_framework import serializers
 
 
@@ -14,10 +14,16 @@ class CandidateSerializer(serializers.ModelSerializer):
         rep["location"] = LocationSerializer(instance.location.all(), many=True).data
         rep["position"] = RunningPositionSerializer(instance.position.all(), many=True).data
         return rep
+    
+class CandidateWithoutLocationSerializer(CandidateSerializer):
+    
+    def to_representation(self, instance):
+        rep = super().to_representation(instance)
+        del rep["location"] 
+        return rep
         
 class LocationSerializer(serializers.ModelSerializer):
-    
-    
+     
     class Meta:
         model = Location
         fields = '__all__'
@@ -35,15 +41,20 @@ class RunningPositionSerializer(serializers.ModelSerializer):
         rep["position"] = PositionSerializer(instance.position).data
         return rep
         
-
-
 class PositionSerializer(serializers.ModelSerializer):
     
     
     class Meta:
         model = Position
         fields = '__all__'
-        
+
+
+class CandidateFileSerializer(serializers.ModelSerializer):
+    
+    
+    class Meta:
+        model = CandidateFile
+        fields = '__all__'     
         
 
 class FileUploadSerializer(serializers.Serializer):

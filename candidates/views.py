@@ -12,7 +12,7 @@ from users.permissions import IsAdminOrSuperUser
 
 from .filters import CandidateFilter
 from .models import Candidate, CandidateFile
-from .serializers import CandidateSerializer, FileUploadSerializer
+from .serializers import CandidateSerializer,CandidateFileSerializer, FileUploadSerializer, CandidateWithoutLocationSerializer
 from .tasks import add_candidates_to_db
 
 
@@ -28,7 +28,11 @@ class CandidateViewset(viewsets.ModelViewSet):
     @method_decorator(vary_on_cookie)
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
-    
+  
+
+class CandidateWithoutFullLocation(CandidateViewset):
+    serializer_class = CandidateWithoutLocationSerializer
+  
 
 class ConfirmFileUpload(generics.CreateAPIView):
     serializer_class = FileUploadSerializer
@@ -91,3 +95,10 @@ class FileUpload(generics.CreateAPIView):
             
         return Response({"message": "Upload successful, the data is being processed in the background"},
                         status.HTTP_200_OK)
+
+
+
+class CandidateFiles(viewsets.ModelViewSet):
+    queryset = CandidateFile.objects.all()
+    serializer_class = CandidateFileSerializer
+    

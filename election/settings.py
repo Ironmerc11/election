@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_filters',
     'cloudinary',
+    'django_rest_passwordreset',
     
     # apps
     'users',
@@ -201,6 +202,7 @@ cloudinary.config(
 CORS_ORIGIN_ALLOW_ALL = True
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240 # higher than the count of fields
 AUTHENTICATION_BACKENDS = ['users.auth_backend.EmailBackend']
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 if env('HEROKU') == True:
     import django_heroku 
     django_heroku.settings(locals())

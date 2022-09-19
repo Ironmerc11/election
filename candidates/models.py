@@ -50,6 +50,8 @@ class Candidate(models.Model):
     ]
     position = models.ManyToManyField(RunningPosition)
     name = models.CharField(max_length=250)
+    candidate_image = CloudinaryField(resource_type='image', null=True)
+    party_image = CloudinaryField(resource_type='image', null=True)
     age = models.PositiveIntegerField(null=True)
     gender = models.CharField(max_length=6, choices=GENDER_CHOICES, default='Male',)
     qualifications = models.CharField(max_length=100, choices=QUALIFICATION_CHOICES, null=True)

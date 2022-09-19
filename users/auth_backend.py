@@ -10,7 +10,7 @@ class EmailBackend(ModelBackend):
             if email is None:
                 email = kwargs.get('username', None)
             user = UserModel.objects.get(email=email)
-            if not user.verified or user.deleted:
+            if not user.verified or not user.is_active:
                 return None
             if user.check_password(kwargs.get('password', None)):
                 return user

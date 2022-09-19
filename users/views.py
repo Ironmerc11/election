@@ -1,9 +1,9 @@
 # Create your views here.
-# import jwt
+
 from django.contrib.auth import get_user_model
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, permissions, status, views
-# EmailVerificationSerializer, SetNewPasswordSerializer, ResetPasswordEmailRequestSerializer
+
 from rest_framework.permissions import AllowAny
 # from django.conf import settings
 from rest_framework.response import Response
@@ -13,14 +13,15 @@ from users.models import User
 from django_filters.rest_framework import DjangoFilterBackend
 from .filters import UserFilter
 
-# from django.contrib.auth.tokens import PasswordResetTokenGenerator
-# from django.utils.encoding import smart_str, force_str, smart_bytes, DjangoUnicodeDecodeError
-# from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
-# from django.contrib.sites.shortcuts import get_current_site
-# from django.urls import reverse
 from .permissions import IsSuperUser
 from .serializers import (RegisterAdminSerializer,
                           UserSerializer, EmailTokenObtainSerializer)
+
+from django.core.mail import EmailMultiAlternatives
+from django.dispatch import receiver
+from django.template.loader import render_to_string
+from django.urls import reverse
+from django_rest_passwordreset.signals import reset_password_token_created
 
 User  = get_user_model()
 
@@ -46,11 +47,8 @@ class GetLoggedInUser(views.APIView):
         serializer = UserSerializer(user)
         return Response(serializer.data)
     
-    
-
-    
 class UserView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = User.objects.all()
+    queryset = User.objects.all().order_by('id')
     # queryset = User.objects.filter(is_staff=True).filter(is_superuser=False)
     permission_classes = (IsSuperUser,)
     serializer_class = UserSerializer
@@ -66,107 +64,70 @@ class UserView(generics.RetrieveUpdateDestroyAPIView):
     #     response = super().get(request, *args, **kwargs)
     #     print(response)
     #     return response
-        
-
+    
+    
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.is_active = False
+        instance.save()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
 class ListUserVier(generics.ListAPIView):
     queryset = User.objects.all()
     # queryset = User.objects.filter(is_staff=True).filter(is_superuser=False)
     permission_classes = (IsSuperUser,)
     serializer_class = UserSerializer
-    ordering = ['-id']
+    ordering = ['id']
     filter_backends = [DjangoFilterBackend]
     filterset_fields = '__all__'
     filterset_class = UserFilter
     
-
-
 class MyObtainTokenPairView(TokenObtainPairView):
     permission_classes = (AllowAny,)
     serializer_class = EmailTokenObtainSerializer
+    
+    
 
 
-# class VerifyEmail(views.APIView):
-#     serializer_class = EmailVerificationSerializer
+# Update this
+@receiver(reset_password_token_created)
+def password_reset_token_created(sender, instance, reset_password_token, *args, **kwargs):
+    """
+    Handles password reset tokens
+    When a token is created, an e-mail needs to be sent to the user
+    :param sender: View Class that sent the signal
+    :param instance: View Instance that sent the signal
+    :param reset_password_token: Token Model Object
+    :param args:
+    :param kwargs:
+    :return:
+    """
+    # send an e-mail to the user
+    context = {
+        'current_user': reset_password_token.user.first_name,
+        'username': reset_password_token.user.username,
+        'email': reset_password_token.user.email,
+        'reset_password_url': "{}?token={}".format(
+            instance.request.build_absolute_uri(reverse('password_reset:reset-password-confirm')),
+            reset_password_token.key)
+    }
 
-#     def get(self, request):
-#         token = request.GET.get('token')
-#         try:
-#             payload = jwt.decode(token, settings.SECRET_KEY)
-#             user = User.objects.get(id=payload['user_id'])
-#             if not user.is_verified:
-#                 user.is_verified = True
-#                 user.save()
-#             return Response({'email': 'Successfully activated'}, status=status.HTTP_200_OK)
-#         except jwt.ExpiredSignatureError as identifier:
-#             return Response({'error': 'Activation Expired'}, status=status.HTTP_400_BAD_REQUEST)
-#         except jwt.exceptions.DecodeError as identifier:
-#             return Response({'error': 'Invalid token'}, status=status.HTTP_400_BAD_REQUEST)    
+    # render email text
+    email_html_message = render_to_string('email/user_reset_password.html', context)
+    email_plaintext_message = render_to_string('email/user_reset_password.txt', context)
 
-
-# class RequestPasswordResetEmail(generics.GenericAPIView):
-#     serializer_class = ResetPasswordEmailRequestSerializer
-
-#     def post(self, request):
-#         serializer = self.serializer_class(data=request.data)
-
-#         email = request.data.get('email', '')
-
-#         if User.objects.filter(email=email).exists():
-#             user = User.objects.get(email=email)
-#             uidb64 = urlsafe_base64_encode(smart_bytes(user.id))
-#             token = PasswordResetTokenGenerator().make_token(user)
-#             current_site = get_current_site(
-#                 request=request).domain
-#             relativeLink = reverse(
-#                 'password-reset-confirm', kwargs={'uidb64': uidb64, 'token': token})
-
-#             redirect_url = request.data.get('redirect_url', '')
-#             absurl = 'http://'+current_site + relativeLink
-#             email_body = 'Hello, \n Use link below to reset your password  \n' + \
-#                 absurl+"?redirect_url="+redirect_url
-#             data = {'email_body': email_body, 'to_email': user.email,
-#                     'email_subject': 'Reset your passsword'}
-#           #  Util.send_email(data)
-#         return Response({'success': 'We have sent you a link to reset your password'}, status=status.HTTP_200_OK)
+    msg = EmailMultiAlternatives(
+        # title:
+        "Password Reset for {title}".format(title="Know Your candidate"),
+        # message:
+        email_plaintext_message,
+        # from:
+        "noreply@somehost.local",
+        # to:
+        [reset_password_token.user.email]
+    )
+    msg.attach_alternative(email_html_message, "text/html")
+    msg.send()
 
 
-# class PasswordTokenCheckAPI(generics.GenericAPIView):
-#     serializer_class = SetNewPasswordSerializer
-
-#     def get(self, request, uidb64, token):
-
-#         redirect_url = request.GET.get('redirect_url')
-
-#         try:
-#             id = smart_str(urlsafe_base64_decode(uidb64))
-#             user = User.objects.get(id=id)
-
-#             if not PasswordResetTokenGenerator().check_token(user, token):
-#                 if len(redirect_url) > 3:
-#                     return CustomRedirect(redirect_url+'?token_valid=False')
-#                 else:
-#                     return CustomRedirect(os.environ.get('FRONTEND_URL', '')+'?token_valid=False')
-
-#             if redirect_url and len(redirect_url) > 3:
-#                 return CustomRedirect(redirect_url+'?token_valid=True&message=Credentials Valid&uidb64='+uidb64+'&token='+token)
-#             else:
-#                 return CustomRedirect(os.environ.get('FRONTEND_URL', '')+'?token_valid=False')
-
-#         except DjangoUnicodeDecodeError as identifier:
-#             try:
-#                 if not PasswordResetTokenGenerator().check_token(user):
-#                     return CustomRedirect(redirect_url+'?token_valid=False')
-                    
-#             except UnboundLocalError as e:
-#                 return Response({'error': 'Token is not valid, please request a new one'}, status=status.HTTP_400_BAD_REQUEST)
-
-
-
-# class SetNewPasswordAPIView(generics.GenericAPIView):
-#     serializer_class = SetNewPasswordSerializer
-
-#     def patch(self, request):
-#         serializer = self.serializer_class(data=request.data)
-#         serializer.is_valid(raise_exception=True)
-#         return Response({'success': True, 'message': 'Password reset success'}, status=status.HTTP_200_OK)            
