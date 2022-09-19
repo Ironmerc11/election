@@ -1,46 +1,53 @@
 from dataclasses import field
 from urllib import response
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-
-from rest_framework import serializers, status, views, permissions, generics
-from rest_framework.permissions import IsAdminUser
-#from django.contrib.auth.models import User
-# from users.models import User
-from rest_framework.validators import UniqueValidator
-from django.contrib.auth.password_validation import validate_password
-from rest_framework.response import Response
-from django.http import HttpResponsePermanentRedirect
 
 from django.contrib import auth
 from django.contrib.auth import get_user_model
-from rest_framework.exceptions import AuthenticationFailed
-from rest_framework_simplejwt.tokens import RefreshToken, TokenError
+from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from django.utils.encoding import smart_str, force_str, smart_bytes, DjangoUnicodeDecodeError
+from django.http import HttpResponsePermanentRedirect
+from django.utils.encoding import (DjangoUnicodeDecodeError, force_str,
+                                   smart_bytes, smart_str)
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from rest_framework import generics, permissions, serializers, status, views
+from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.permissions import IsAdminUser
+from rest_framework.response import Response
+#from django.contrib.auth.models import User
+# from users.models import User
+from rest_framework.validators import UniqueValidator
+from rest_framework_simplejwt.serializers import (TokenObtainPairSerializer,
+                                                  TokenObtainSerializer)
+from rest_framework_simplejwt.tokens import RefreshToken, TokenError
+
 from .generate_random_username import generate_random_username
 
 User = get_user_model()
 
 class RegisterAdminSerializer(serializers.ModelSerializer):
+    
+    choices = [('admin', 'admin',), ('superuser', 'superuser')]
     email = serializers.EmailField(
             required=True,
             validators=[UniqueValidator(queryset=User.objects.all())]
             )
 
-    password = serializers.CharField(write_only=True, required=True,
-                                     validators=[validate_password]
+    password = serializers.CharField(required=True,validators=[validate_password]
                                      )
+    
+    account_type = serializers.ChoiceField(choices=choices)
 
     class Meta:
         model = User
-        fields = ('email','password')
+        fields = ('email','password', 'account_type')
         # extra_kwargs = {
         #     'username': {'required': False},
         #     # 'last_name': {'required': True}
         # }
 
     def create(self, validated_data):
+        print(validated_data)
+        account_type = validated_data['account_type']
         user = User.objects.create(
             username=generate_random_username(),
             email=validated_data['email']
@@ -48,21 +55,19 @@ class RegisterAdminSerializer(serializers.ModelSerializer):
 
         
         user.set_password(validated_data['password'])
-        user.is_staff = True
+        if account_type == 'admin':
+            user.is_staff = True
+        elif account_type == 'superuser':
+            user.is_staff = True
+            user.is_superuser = True
         user.save()
         # send email
-        return user
+        return validated_data
 
 
-class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+class EmailTokenObtainSerializer(TokenObtainPairSerializer):
+    username_field = User.EMAIL_FIELD
 
-    @classmethod
-    def get_token(cls, user):
-        token = super(MyTokenObtainPairSerializer, cls).get_token(user)
-        # Add custom claims
-        token['username'] = user.username
-        return token
-    
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -77,7 +82,7 @@ class UserSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ['username', 'password', 'email', 'id', 'first_name', 'last_name']
+        fields = ['username', 'password', 'email', 'id', 'first_name', 'last_name', 'verified', 'is_superuser', 'is_staff']
         
         
     def update(self, instance, validated_data):
@@ -154,3 +159,9 @@ class LogoutSerializer(serializers.Serializer):
 
         except TokenError:
             self.fail('bad_token')               
+            
+            
+
+
+
+# Forgot and reset password

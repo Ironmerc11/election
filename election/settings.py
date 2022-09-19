@@ -200,6 +200,7 @@ cloudinary.config(
 
 CORS_ORIGIN_ALLOW_ALL = True
 
+AUTHENTICATION_BACKENDS = ['users.auth_backend.EmailBackend']
 if env('HEROKU') == True:
     import django_heroku 
     django_heroku.settings(locals())

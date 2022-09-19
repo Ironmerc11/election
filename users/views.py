@@ -1,33 +1,53 @@
 # Create your views here.
-from .serializers import RegisterAdminSerializer, MyTokenObtainPairSerializer, UserSerializer
-# EmailVerificationSerializer, SetNewPasswordSerializer, ResetPasswordEmailRequestSerializer
-from rest_framework.permissions import AllowAny
-from users.models import User
-from rest_framework_simplejwt.views import TokenObtainPairView
-
-from rest_framework import generics, views, status
-# from django.conf import settings
-from rest_framework.response import Response
 # import jwt
 from django.contrib.auth import get_user_model
+from drf_yasg.utils import swagger_auto_schema
+from rest_framework import generics, permissions, status, views
+# EmailVerificationSerializer, SetNewPasswordSerializer, ResetPasswordEmailRequestSerializer
+from rest_framework.permissions import AllowAny
+# from django.conf import settings
+from rest_framework.response import Response
+from rest_framework_simplejwt.views import TokenObtainPairView
+
+from users.models import User
+from django_filters.rest_framework import DjangoFilterBackend
+from .filters import UserFilter
+
 # from django.contrib.auth.tokens import PasswordResetTokenGenerator
 # from django.utils.encoding import smart_str, force_str, smart_bytes, DjangoUnicodeDecodeError
 # from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 # from django.contrib.sites.shortcuts import get_current_site
 # from django.urls import reverse
 from .permissions import IsSuperUser
+from .serializers import (RegisterAdminSerializer,
+                          UserSerializer, EmailTokenObtainSerializer)
 
 User  = get_user_model()
-
-
-import os
 
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     permission_classes = (AllowAny,)
     serializer_class = RegisterAdminSerializer
+
+
+
+class GetLoggedInUser(views.APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    # serializer_class = UserSerializer
+    ordering = ['id']
     
+    @swagger_auto_schema(responses={200: UserSerializer()})
+    def get(self, request, format=None):
+        """
+        Return the logged in user details.
+        """
+        user = User.objects.get(email=request.user)
+        serializer = UserSerializer(user)
+        return Response(serializer.data)
+    
+    
+
     
 class UserView(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
@@ -49,9 +69,21 @@ class UserView(generics.RetrieveUpdateDestroyAPIView):
         
 
 
+class ListUserVier(generics.ListAPIView):
+    queryset = User.objects.all()
+    # queryset = User.objects.filter(is_staff=True).filter(is_superuser=False)
+    permission_classes = (IsSuperUser,)
+    serializer_class = UserSerializer
+    ordering = ['-id']
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = '__all__'
+    filterset_class = UserFilter
+    
+
+
 class MyObtainTokenPairView(TokenObtainPairView):
     permission_classes = (AllowAny,)
-    serializer_class = MyTokenObtainPairSerializer
+    serializer_class = EmailTokenObtainSerializer
 
 
 # class VerifyEmail(views.APIView):
