@@ -2,25 +2,25 @@ from .models import Candidate
 from django_filters import rest_framework as filters
 
 class CandidateFilter(filters.FilterSet):
-    location__year = filters.CharFilter(lookup_expr='icontains')
-    location__state = filters.CharFilter(lookup_expr='icontains')
-    location__state_code = filters.CharFilter(lookup_expr='icontains')
-    location__senatorial_district = filters.CharFilter(lookup_expr='icontains')
-    location__senatorial_district_code = filters.CharFilter(lookup_expr='icontains')
-    location__federal_constituency = filters.CharFilter(lookup_expr='icontains')
-    location__federal_constituency__code = filters.CharFilter(lookup_expr='icontains')
-    location__state_constituency = filters.CharFilter(lookup_expr='icontains')
-    location__state_constituency_code = filters.CharFilter(lookup_expr='icontains')
-    location__lga = filters.CharFilter(lookup_expr='icontains')
-    location__lga_code = filters.CharFilter(lookup_expr='icontains')
-    location__ward = filters.CharFilter(lookup_expr='icontains')
-    location__ward_code = filters.CharFilter(lookup_expr='icontains')
-    location__polling_unit = filters.CharFilter(lookup_expr='icontains')
-    location__polling_unit_code = filters.CharFilter(lookup_expr='icontains')
+    # location__year = filters.CharFilter(lookup_expr='icontains')
+    state = filters.CharFilter(field_name='location__state',lookup_expr='icontains')
+    state_code = filters.CharFilter(field_name='location__state_code', lookup_expr='icontains')
+    senatorial_district = filters.CharFilter(field_name='location__senatorial_district', lookup_expr='icontains')
+    senatorial_district_code = filters.CharFilter(field_name='location__senatorial_district_code',lookup_expr='icontains')
+    federal_constituency = filters.CharFilter(field_name='location__federal_constituency', lookup_expr='icontains')
+    federal_constituency_code = filters.CharFilter(field_name='location__federal_constituency_code',lookup_expr='icontains')
+    state_constituency = filters.CharFilter(field_name='location__state_constituency',lookup_expr='icontains')
+    state_constituency_code = filters.CharFilter(field_name='location__state_constituency_code',lookup_expr='icontains')
+    lga = filters.CharFilter(field_name='location__lga',lookup_expr='icontains')
+    lga_code = filters.CharFilter(field_name='location__lga_code',lookup_expr='icontains')
+    ward = filters.CharFilter(field_name='location__ward',lookup_expr='icontains')
+    ward_code = filters.CharFilter(field_name='location__ward_code',lookup_expr='icontains')
+    polling_unit = filters.CharFilter(field_name='location__polling_unit',lookup_expr='icontains')
+    polling_unit_code = filters.CharFilter(field_name='location__polling_unit_code',lookup_expr='icontains')
     party = filters.CharFilter(lookup_expr='icontains')
     name = filters.CharFilter(lookup_expr='icontains')
-    position__year = filters.CharFilter(lookup_expr='icontains')
-    position__position__name = filters.CharFilter(lookup_expr='icontains')
+    year = filters.CharFilter(field_name='position__year',lookup_expr='icontains')
+    position= filters.CharFilter(field_name='position__position__name',lookup_expr='icontains')
     min_age = filters.NumberFilter(field_name="age", lookup_expr='gte')
     max_age = filters.NumberFilter(field_name="age", lookup_expr='lte')
     
@@ -29,4 +29,6 @@ class CandidateFilter(filters.FilterSet):
 
     class Meta:
         model = Candidate
-        fields = ['name', 'min_age', 'max_age' ,'gender', 'qualifications', 'location', 'party', 'position']
+        fields = ['name', 'min_age', 'max_age' ,'gender', 'qualifications', 'location', 'party', 'state', 'senatorial_district', 'federal_constituency', 
+                  'state_constituency','lga','ward','polling_unit','position','year','state_code','senatorial_district_code','federal_constituency_code',
+                  'state_constituency_code','lga_code','ward_code','polling_unit_code']

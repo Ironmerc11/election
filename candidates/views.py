@@ -24,6 +24,7 @@ class CandidateViewset(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_fields = '__all__'
     filterset_class = CandidateFilter
+    ordering = ['id']
     
     # With cookie: cache requested url for each user for 2 hours
     @method_decorator(cache_page(60*60*5))
