@@ -1,21 +1,25 @@
 
-from asyncore import poll
+import collections
+from datetime import datetime
 import os
+from candidates.utils import flatten_array,array_to_dict
 
 import pandas as pd
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie, vary_on_headers
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import generics, status, viewsets, views
+from rest_framework import generics, status, views, viewsets
 from rest_framework.response import Response
 from users.permissions import IsAdminOrSuperUser
 
-from .filters import CandidateFilter
-from .models import Candidate, CandidateFile
-from .serializers import CandidateSerializer,CandidateFileSerializer, FileUploadSerializer, CandidateWithoutLocationSerializer
-from .tasks import add_candidates_to_db
 from .filter_select_fields import get_filter_data
+from .filters import CandidateFilter
+from .models import Candidate, CandidateFile, SearchQuery
+from .serializers import (CandidateFileSerializer, CandidateSerializer,
+                          CandidateWithoutLocationSerializer,
+                          FileUploadSerializer)
+from .tasks import add_candidates_to_db
 
 
 class CandidateViewset(viewsets.ModelViewSet):
@@ -30,6 +34,10 @@ class CandidateViewset(viewsets.ModelViewSet):
     @method_decorator(cache_page(60*60*5))
     @method_decorator(vary_on_cookie)
     def list(self, request, *args, **kwargs):
+        SearchQuery.objects.create(
+            filter_combo = ("+").join(list(request.query_params.keys())),
+            keywords = list(request.query_params.values())
+        )        
         return super().list(request, *args, **kwargs)
   
 
@@ -102,10 +110,11 @@ class FileUpload(generics.CreateAPIView):
 class CandidateFiles(viewsets.ModelViewSet):
     queryset = CandidateFile.objects.all()
     serializer_class = CandidateFileSerializer
+    permission_classes = [IsAdminOrSuperUser]
+
 
 
 class GetFilterData(views.APIView):
-    
     
     def get(self, request, format=None):
         """
@@ -122,3 +131,28 @@ class GetFilterData(views.APIView):
         data = get_filter_data(request.query_params.get('filter'),state,senatorial_district,federal_constituency,
                                state_constituency, lga, ward, polling_unit)
         return Response(data)
+    
+
+class SearchQueryView(views.APIView):
+    permission_classes = [IsAdminOrSuperUser]
+
+    @method_decorator(cache_page(60*60*5))
+    @method_decorator(vary_on_cookie)
+    def get(self, request, format=None):
+        queries_today = SearchQuery.objects.filter(created_at__contains=datetime.today().date())
+        filters_today = queries_today.count()
+        searches_today = flatten_array(list(queries_today.values_list('keywords', flat=True)))
+        
+        search_params_list = flatten_array(list(SearchQuery.objects.all().values_list('keywords', flat=True)))
+        filter_params_list = SearchQuery.objects.all().values_list('filter_combo', flat=True) 
+        
+        filter_params = array_to_dict(collections.Counter(filter_params_list).most_common(10))
+
+        search_params = array_to_dict(collections.Counter(search_params_list).most_common(10))
+        res = {
+            "keywords":search_params,
+            "filters":filter_params,
+            "filters_today":filters_today,
+            "searches_today":len(searches_today)
+        }
+        return Response(res)

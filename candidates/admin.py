@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Candidate, Location, Position, RunningPosition, CandidateFile
+from .models import Candidate, Location, Position, RunningPosition, CandidateFile, SearchQuery
 
 
 
@@ -29,3 +29,4 @@ admin.site.register(Location)
 admin.site.register(Position)
 admin.site.register(RunningPosition)
 admin.site.register(CandidateFile)
+admin.site.register(SearchQuery)

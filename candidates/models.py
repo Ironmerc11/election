@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.postgres.fields import ArrayField
 from cloudinary.models import CloudinaryField
 
 
@@ -65,9 +66,6 @@ class Candidate(models.Model):
         return self.name    
     
 
-
-
-
 class CandidateFile(models.Model):
     UPLOAD_CHOICES = [
         ('Success','Success'),
@@ -82,4 +80,14 @@ class CandidateFile(models.Model):
 
     
     
+    
+class SearchQuery(models.Model):
+    filter_combo = models.CharField(max_length=500)
+    keywords = ArrayField(models.CharField(max_length=200), blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    
+    def __str__(self):
+        return self.filter_combo
     
