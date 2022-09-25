@@ -16,14 +16,25 @@ def get_filter_data(filter,state,senatorial_district,federal_constituency,
     if filter.lower() == 'senatorial_district':
         return set(Location.objects.filter(state=state).values_list('senatorial_district', flat=True))
     if filter.lower() == 'federal_constituency':
+        if state:
+            return set(Location.objects.filter(state=state).values_list('federal_constituency', flat=True))
+        
         return set(Location.objects.filter(senatorial_district=senatorial_district).values_list('federal_constituency', flat=True))
     if filter.lower() == 'state_constituency':
+        if state:
+            return set(Location.objects.filter(federal_constituency=federal_constituency).values_list('state_constituency', flat=True)) 
         return set(Location.objects.filter(federal_constituency=federal_constituency).values_list('state_constituency', flat=True))
     if filter.lower() == 'lga':
+        if state:
+            return set(Location.objects.filter(state=state).values_list('lga', flat=True))
         return set(Location.objects.filter(state_constituency=state_constituency).values_list('lga', flat=True))
     if filter.lower() == 'ward':
+        if state:
+            return set(Location.objects.filter(state=state).values_list('ward', flat=True))
         return set(Location.objects.filter(lga=lga).values_list('ward', flat=True))
     if filter.lower() == 'polling_unit':
+        if state:
+            return set(Location.objects.filter(state=state).values_list('polling_unit', flat=True))
         return set(Location.objects.filter(ward=ward).values_list('polling_unit', flat=True))
     
     
