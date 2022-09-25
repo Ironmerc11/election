@@ -22,7 +22,7 @@ def get_filter_data(filter,state,senatorial_district,federal_constituency,
         return set(Location.objects.filter(senatorial_district=senatorial_district).values_list('federal_constituency', flat=True))
     if filter.lower() == 'state_constituency':
         if state:
-            return set(Location.objects.filter(federal_constituency=federal_constituency).values_list('state_constituency', flat=True)) 
+            return set(Location.objects.filter(state=state).values_list('state_constituency', flat=True)) 
         return set(Location.objects.filter(federal_constituency=federal_constituency).values_list('state_constituency', flat=True))
     if filter.lower() == 'lga':
         if state:
