@@ -11,6 +11,10 @@ class CandidateSerializer(serializers.ModelSerializer):
     
     def to_representation(self, instance):
         rep = super().to_representation(instance)
+        if rep['candidate_image']:
+            rep['candidate_image'] = 'http://res.cloudinary.com/rammy/'+ rep['candidate_image']
+        if rep['party_image']:
+            rep['party_image'] = 'http://res.cloudinary.com/rammy/'+ rep['party_image']
         rep["location"] = LocationSerializer(instance.location.all(), many=True).data
         rep["position"] = RunningPositionSerializer(instance.position.all(), many=True).data
         return rep

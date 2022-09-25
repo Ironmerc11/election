@@ -29,20 +29,30 @@ class CandidateViewset(viewsets.ModelViewSet):
     filterset_fields = '__all__'
     filterset_class = CandidateFilter
     ordering = ['id']
+
     
     # With cookie: cache requested url for each user for 2 hours
     @method_decorator(cache_page(60*60*5))
     @method_decorator(vary_on_cookie)
     def list(self, request, *args, **kwargs):
-        SearchQuery.objects.create(
-            filter_combo = ("+").join(list(request.query_params.keys())),
-            keywords = list(request.query_params.values())
-        )        
         return super().list(request, *args, **kwargs)
+    
+    # Used this method to hack the caching and also 
+    def finalize_response(self, request, response, *args, **kwargs):
+        query_params = dict(request.query_params)
+        query_params.pop('page', None)
+        filter_combo = ("+").join(list(query_params.keys()))
+        if filter_combo:
+            SearchQuery.objects.create(
+                filter_combo = ("+").join(list(query_params.keys())),
+                keywords = list(request.query_params.values())
+            )
+        return super().finalize_response(request, response, *args, **kwargs)
   
 
 class CandidateWithoutFullLocation(CandidateViewset):
     serializer_class = CandidateWithoutLocationSerializer
+    
   
 
 class ConfirmFileUpload(generics.CreateAPIView):
