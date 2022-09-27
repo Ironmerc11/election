@@ -1,9 +1,9 @@
 
 import collections
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 from candidates.utils import flatten_array,array_to_dict
-
+from django.utils.timezone import make_aware
 import pandas as pd
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
@@ -149,12 +149,26 @@ class SearchQueryView(views.APIView):
     @method_decorator(cache_page(60*60*5))
     @method_decorator(vary_on_cookie)
     def get(self, request, format=None):
-        queries_today = SearchQuery.objects.filter(created_at__contains=datetime.today().date())
-        filters_today = queries_today.count()
-        searches_today = flatten_array(list(queries_today.values_list('keywords', flat=True)))
+        period = request.query_params.get('period')
+        enddate = make_aware(datetime.today())
+        if period.lower() == 'day':
+            startdate = enddate
+        elif period.lower() == 'week':
+            startdate = enddate - timedelta(days=7)
+        elif period.lower() == 'month':
+            startdate = enddate - timedelta(days=30)
+
+        if period.lower() == 'lifetime':
+            queries = SearchQuery.objects.all()
+        else:
+            queries = SearchQuery.objects.filter(created_at__range=[startdate, enddate])
+            
+    
+        filters = queries.count()
+        searches_today = flatten_array(list(queries.values_list('keywords', flat=True)))
         
-        search_params_list = flatten_array(list(SearchQuery.objects.all().values_list('keywords', flat=True)))
-        filter_params_list = SearchQuery.objects.all().values_list('filter_combo', flat=True) 
+        search_params_list = flatten_array(list(queries.values_list('keywords', flat=True)))
+        filter_params_list = queries.values_list('filter_combo', flat=True) 
         
         filter_params = array_to_dict(collections.Counter(filter_params_list).most_common(10))
 
@@ -162,7 +176,7 @@ class SearchQueryView(views.APIView):
         res = {
             "keywords":search_params,
             "filters":filter_params,
-            "filters_today":filters_today,
-            "searches_today":len(searches_today)
+            "total_filters":filters,
+            "searches":len(searches_today)
         }
         return Response(res)
