@@ -6,12 +6,12 @@ class User(AbstractUser):
     verified = models.BooleanField(default=False)
     verified_date = models.DateTimeField(null=True, blank=True)
     last_modified = models.DateTimeField(auto_now=True)
+    name = models.CharField(null=True, max_length=255)
+    first_name = None
+    last_name = None
 
     def get_short_name(self):
-        if len(self.first_name + self.last_name) > 3:
-            return "{} {}".format(self.first_name, self.last_name)
-        else:
-            return self.email
+        return self.name
         
 
     def __str__(self):
