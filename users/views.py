@@ -5,7 +5,6 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, permissions, status, views
 
 from rest_framework.permissions import AllowAny
-# from django.conf import settings
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 

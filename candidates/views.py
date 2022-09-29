@@ -15,10 +15,10 @@ from users.permissions import IsAdminOrSuperUser
 
 from .filter_select_fields import get_filter_data
 from .filters import CandidateFilter
-from .models import Candidate, CandidateFile, SearchQuery
+from .models import Candidate, CandidateFile, Location, SearchQuery
 from .serializers import (CandidateFileSerializer, CandidateSerializer,
                           CandidateWithoutLocationSerializer,
-                          FileUploadSerializer)
+                          FileUploadSerializer, LocationSerializer)
 from .tasks import add_candidates_to_db
 
 
@@ -123,7 +123,6 @@ class CandidateFiles(viewsets.ModelViewSet):
     permission_classes = [IsAdminOrSuperUser]
 
 
-
 class GetFilterData(views.APIView):
     
     def get(self, request, format=None):
@@ -180,3 +179,9 @@ class SearchQueryView(views.APIView):
             "searches":len(searches_today)
         }
         return Response(res)
+
+
+class LocationView(viewsets.ModelViewSet):
+    queryset = Location.objects.all()
+    serializer_class = LocationSerializer
+    permission_classes = [IsAdminOrSuperUser]
