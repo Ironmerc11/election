@@ -22,7 +22,7 @@ class Command(BaseCommand):
         'Higher Certificate'
     ]
         for candidate in candidates:
-            candidate.party_image = 'https://res.cloudinary.com/rammy/image/upload/v1664546407/party.jpg'
+            candidate.party_image = 'https://res.cloudinary.com/rammy/image/upload/v1664547789/All_Progressives_Congress_logo.png'
             candidate.candidate_image = 'https://res.cloudinary.com/rammy/image/upload/v1664546426/peter-obi.jpg'
             candidate.age = randrange(40, 70)
             candidate.qualifications = choice(QUALIFICATION_CHOICES)
