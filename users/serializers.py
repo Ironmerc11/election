@@ -39,7 +39,7 @@ class RegisterAdminSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('email','password', 'account_type')
+        fields = ('email','password', 'account_type', 'name')
         # extra_kwargs = {
         #     'username': {'required': False},
         #     # 'last_name': {'required': True}
@@ -50,7 +50,8 @@ class RegisterAdminSerializer(serializers.ModelSerializer):
         account_type = validated_data['account_type']
         user = User.objects.create(
             username=generate_random_username(),
-            email=validated_data['email']
+            email=validated_data['email'],
+            name=validated_data['name']
         )
 
         
