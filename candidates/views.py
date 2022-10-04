@@ -109,7 +109,7 @@ class FileUpload(generics.CreateAPIView):
                 else:
                     return Response({"error": f"The File is missing one header, the headers should be in this order {headers}"}, status.HTTP_400_BAD_REQUEST)
         
-        saved_file = CandidateFile.objects.create(file=file)
+        saved_file = CandidateFile.objects.create(file=file, year=year)
         saved_file.status = 'Uploading'
         saved_file.save()
         add_candidates_to_db.delay(saved_file.id, parties, year)
@@ -151,7 +151,7 @@ class SearchQueryView(views.APIView):
         period = request.query_params.get('period')
         enddate = make_aware(datetime.today())
         if period.lower() == 'day':
-            startdate = enddate
+            startdate = enddate - timedelta(days=1)
         elif period.lower() == 'week':
             startdate = enddate - timedelta(days=7)
         elif period.lower() == 'month':

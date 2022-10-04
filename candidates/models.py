@@ -77,6 +77,7 @@ class CandidateFile(models.Model):
     active = models.BooleanField(default=True)
     status = models.CharField(choices=UPLOAD_CHOICES, max_length=50, null=True)
     message = models.CharField(max_length=300, null=True)
+    year = models.CharField(max_length=4, null=True)
 
     
     
