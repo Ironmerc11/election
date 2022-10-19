@@ -51,8 +51,8 @@ class Candidate(models.Model):
     ]
     position = models.ManyToManyField(RunningPosition)
     name = models.CharField(max_length=250)
-    candidate_image = CloudinaryField(resource_type='image', null=True)
-    party_image = CloudinaryField(resource_type='image', null=True)
+    candidate_image = models.URLField( null=True)
+    party_image = models.URLField( null=True)
     age = models.PositiveIntegerField(null=True)
     gender = models.CharField(max_length=6, choices=GENDER_CHOICES, default='Male',)
     qualifications = models.CharField(max_length=100, choices=QUALIFICATION_CHOICES, null=True)
@@ -73,7 +73,7 @@ class CandidateFile(models.Model):
         ('Uploading','Uploading'),
     ]
     uploaded_at = models.DateTimeField(auto_now_add=True)
-    file = CloudinaryField(resource_type='raw')
+    file = models.FileField(upload_to='election-csv/')
     active = models.BooleanField(default=True)
     status = models.CharField(choices=UPLOAD_CHOICES, max_length=50, null=True)
     message = models.CharField(max_length=300, null=True)

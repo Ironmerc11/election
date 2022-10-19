@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'django_filters',
     'cloudinary',
     'django_rest_passwordreset',
+    'storages',
     
     # apps
     'users',
@@ -189,18 +190,40 @@ CELERY_TIMEZONE = TIME_ZONE
 
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+# MEDIA_URL = '/media/'
+# MEDIA_ROOT = BASE_DIR / 'media'
 
 
-cloudinary.config( 
-  cloud_name = env('CLOUDINARY_CLOUD_NAME'), 
-  api_key = env("CLOUDINARY_API_KEY"), 
-  api_secret = env("CLOUDINARY_SECRET_KEY") 
-)
+
+
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/1.11/howto/static-files/
+
+AWS_ACCESS_KEY_ID = env('SPACES_ACCESS_KEY')
+AWS_SECRET_ACCESS_KEY = env('SPACES_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = env('SPACES_BUCKET_NAME')
+AWS_S3_ENDPOINT_URL = env('SPACES_S3_ENDPOINT_URL_WITH_HTTPS')
+AWS_S3_OBJECT_PARAMETERS = {
+    'CacheControl': 'max-age=86400',
+}
+AWS_LOCATION = env('SPACES_LOCATION')
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, '/static/'),
+]
+STATIC_URL = 'https://%s/%s/' % ('fra1.digitaloceanspaces.com', AWS_LOCATION)
+STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+# File
+DEFAULT_FILE_STORAGE = 'custom_storages.MediaStorage'
+MEDIA_URL = '{}/{}/'.format('fra1.digitaloceanspaces.com', 'media')
+MEDIA_ROOT = 'media/'
+
 
 CORS_ORIGIN_ALLOW_ALL = True
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240 # higher than the count of fields
+
+
 AUTHENTICATION_BACKENDS = ['users.auth_backend.EmailBackend']
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 if env('HEROKU') == True:
