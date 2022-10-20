@@ -1,0 +1,33 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>HTML email template</title>
+    <meta name="viewport" content="width = 375, initial-scale = -1">
+  </head>
+
+  <body style="background-color: #ffffff; font-size: 16px;">
+    <center>
+      <table align="center" border="0" cellpadding="0" cellspacing="0" style="height:100%; width:600px;">
+          <!-- BEGIN EMAIL -->
+          <tr>
+            <td align="center" bgcolor="#ffffff" style="padding:30px">
+               <p style="text-align:left">Hello, {{current_user}}<br><br> Welcome to Know your candidate platform, You have just been signed up, Below are you account details
+              </p>
+              <p>Name: <span>{{name}}</span><p>
+              <p>Email: <span>{{email}}</span><p>
+            <p>Password: <span>{{password}}</span><p>
+
+              <p>
+                <a target="_blank" style="text-decoration:none; background-color: black; border: black 1px solid; color: #fff; padding:10px 10px; display:block;" href="{{website}}">
+                  <strong>Login here</strong></a>
+              </p>
+              <p style="text-align:left">
+              Sincerely,<br>The Know your candidate team
+              </p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </center>
+  </body>
+</html>

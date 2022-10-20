@@ -21,6 +21,9 @@ from rest_framework_simplejwt.serializers import (TokenObtainPairSerializer,
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 
 from .generate_random_username import generate_random_username
+from django.template.loader import render_to_string
+from django.core.mail import EmailMultiAlternatives
+
 
 User = get_user_model()
 
@@ -63,7 +66,28 @@ class RegisterAdminSerializer(serializers.ModelSerializer):
             user.is_superuser = True
         user.save()
         # send email
-        return validated_data
+        context = {
+            'name': user.name,
+            'password': validated_data['password'],
+            'email': user.email,
+            'website': 'https://knowyourcandidate.com/login/'
+        }
+        email_html_message = render_to_string('email/create_user.html', context)
+        email_plaintext_message = render_to_string('email/create_user.txt', context)
+
+        msg = EmailMultiAlternatives(
+            # title:
+            "{name} welcome to {title}".format(name=user.name,title="Know Your candidate"),
+            # message:
+            email_plaintext_message,
+            # from:
+            "info@knowyourcandidate.ng",
+            # to:
+            [user.email]
+        )
+        msg.attach_alternative(email_html_message, "text/html")
+        msg.send()
+        return validated_data   
 
 
 class EmailTokenObtainSerializer(TokenObtainPairSerializer):

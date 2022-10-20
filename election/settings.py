@@ -33,7 +33,8 @@ SECRET_KEY = env('SECRET_KEY')
 DEBUG = env('DEBUG')
 
 ALLOWED_HOSTS = [
-   "*"
+   "138.68.172.75",
+   '127.0.0.1'
 ]
 
 
@@ -224,8 +225,24 @@ CORS_ORIGIN_ALLOW_ALL = True
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240 # higher than the count of fields
 
 
+# Auth
 AUTHENTICATION_BACKENDS = ['users.auth_backend.EmailBackend']
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# Email
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.zoho.com'
+EMAIL_HOST_USER = env('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+
+
+
+
+
+
 if env('HEROKU') == True:
     import django_heroku 
     django_heroku.settings(locals())

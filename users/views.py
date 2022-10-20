@@ -109,7 +109,9 @@ def password_reset_token_created(sender, instance, reset_password_token, *args, 
         'email': reset_password_token.user.email,
         'reset_password_url': "{}?token={}".format(
             instance.request.build_absolute_uri(reverse('password_reset:reset-password-confirm')),
-            reset_password_token.key)
+            reset_password_token.key),
+        'protocol': 'https',
+        'domain': 'knowyourcandidate.ng'
     }
 
     # render email text
@@ -122,7 +124,7 @@ def password_reset_token_created(sender, instance, reset_password_token, *args, 
         # message:
         email_plaintext_message,
         # from:
-        "noreply@somehost.local",
+        "info@knowyourcandidate.ng",
         # to:
         [reset_password_token.user.email]
     )
