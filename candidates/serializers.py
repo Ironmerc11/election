@@ -1,4 +1,6 @@
-from .models import Candidate, Location, RunningPosition, Position, CandidateFile
+from dataclasses import field
+from pyexpat import model
+from .models import Candidate, Location, RunningPosition, Position, CandidateFile,ImageUpload
 from rest_framework import serializers
 
 
@@ -64,3 +66,10 @@ class CandidateFileSerializer(serializers.ModelSerializer):
 class FileUploadSerializer(serializers.Serializer):
     file = serializers.FileField()
     year = serializers.CharField(allow_blank=True, allow_null=True, required=False)
+    
+
+class ImageUploadSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = ImageUpload
+        fields = '__all__'

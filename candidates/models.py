@@ -1,3 +1,5 @@
+from distutils.command.upload import upload
+from pyexpat import model
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 from cloudinary.models import CloudinaryField
@@ -41,21 +43,21 @@ class Candidate(models.Model):
         ('Male', 'Male'),
         ('Female', 'Female'),
         ]
-    QUALIFICATION_CHOICES = [
-        ('Doctorate Degree','Doctorate Degree'),
-        ('Masters Degree', 'Masters Degree'),
-        ('Honours Degree','Honours Degree'),
-        ('Bachelors Degree','Bachelors Degree'),
-        ('National Diploma','National Diploma'),
-        ('Higher Certificate','Higher Certificate')
-    ]
+    # QUALIFICATION_CHOICES = [
+    #     ('Doctorate Degree','Doctorate Degree'),
+    #     ('Masters Degree', 'Masters Degree'),
+    #     ('Honours Degree','Honours Degree'),
+    #     ('Bachelors Degree','Bachelors Degree'),
+    #     ('National Diploma','National Diploma'),
+    #     ('Higher Certificate','Higher Certificate')
+    # ]
     position = models.ManyToManyField(RunningPosition)
     name = models.CharField(max_length=250)
     candidate_image = models.URLField( null=True)
     party_image = models.URLField( null=True)
     age = models.PositiveIntegerField(null=True)
     gender = models.CharField(max_length=6, choices=GENDER_CHOICES, default='Male',)
-    qualifications = models.CharField(max_length=100, choices=QUALIFICATION_CHOICES, null=True)
+    qualifications = models.CharField(max_length=250, null=True)
     party = models.CharField(max_length=100, null=True)
     location = models.ManyToManyField(Location)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -91,4 +93,11 @@ class SearchQuery(models.Model):
     
     def __str__(self):
         return self.filter_combo
+    
+
+
+class ImageUpload(models.Model):
+    image = models.ImageField(upload_to='candidate-pictures/')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     

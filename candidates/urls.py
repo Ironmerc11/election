@@ -1,13 +1,17 @@
-from .views import CandidateViewset, ConfirmFileUpload, CandidateFiles,FileUpload, CandidateWithoutFullLocation,GetFilterData, SearchQueryView, LocationView
-from rest_framework.routers import DefaultRouter
 from django.urls import path
+from rest_framework.routers import DefaultRouter
 
+from .views import (CandidateFiles, CandidateViewset,
+                    CandidateWithoutFullLocation, ConfirmFileUpload,
+                    FileUpload, GetFilterData, ImageUploadView, LocationView,
+                    SearchQueryView)
 
 router = DefaultRouter()
 router.register(r'without-location', CandidateWithoutFullLocation, basename='candidate-location')
 router.register(r'location', LocationView, basename='location')
 router.register(r'files', CandidateFiles, basename='files')
 router.register(r'', CandidateViewset, basename='candidate')
+router.register(r'images', ImageUploadView, basename='images')
 
 
 

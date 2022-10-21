@@ -15,10 +15,10 @@ from users.permissions import IsAdminOrSuperUser
 
 from .filter_select_fields import get_filter_data
 from .filters import CandidateFilter
-from .models import Candidate, CandidateFile, Location, SearchQuery
+from .models import Candidate, CandidateFile, Location, SearchQuery, ImageUpload
 from .serializers import (CandidateFileSerializer, CandidateSerializer,
                           CandidateWithoutLocationSerializer,
-                          FileUploadSerializer, LocationSerializer)
+                          FileUploadSerializer, LocationSerializer, ImageUploadSerializer)
 from .tasks import add_candidates_to_db
 
 
@@ -53,8 +53,6 @@ class CandidateViewset(viewsets.ModelViewSet):
 class CandidateWithoutFullLocation(CandidateViewset):
     serializer_class = CandidateWithoutLocationSerializer
     
-  
-
 class ConfirmFileUpload(generics.CreateAPIView):
     serializer_class = FileUploadSerializer
     permission_classes = [IsAdminOrSuperUser]
@@ -79,8 +77,6 @@ class ConfirmFileUpload(generics.CreateAPIView):
         return Response({"data": "None"},
                         status.HTTP_200_OK)
         
-
-
 class FileUpload(generics.CreateAPIView):
     serializer_class = FileUploadSerializer
     permission_classes = [IsAdminOrSuperUser]
@@ -96,7 +92,7 @@ class FileUpload(generics.CreateAPIView):
             
         _, file_extension = os.path.splitext(file.name)
         if file_extension == '.xlsx':   
-            reader = pd.read_excel(file)
+            reader = pd.read_excel(file, 'Sheet1')
         elif file_extension == '.csv':
             reader = pd.read_csv(file)
         headers = ["STATE", "STATECODE", "SENATORIAL DISTRICT", "FEDERAL CONSTITUENCY",	"STATE CONSTITUENCY", "LGA", "LGACODE", "WARD", "WARDCODE", "POLLING UNIT", "PUCODE", "POSITION"]
@@ -180,8 +176,13 @@ class SearchQueryView(views.APIView):
         }
         return Response(res)
 
-
 class LocationView(viewsets.ModelViewSet):
     queryset = Location.objects.all()
     serializer_class = LocationSerializer
+    permission_classes = [IsAdminOrSuperUser]
+    
+
+class ImageUploadView(viewsets.ModelViewSet):
+    queryset = ImageUpload.objects.all()
+    serializer_class = ImageUploadSerializer
     permission_classes = [IsAdminOrSuperUser]

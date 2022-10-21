@@ -1,9 +1,10 @@
-import json
-from celery import shared_task
-import os
-from django.conf import settings
+
 import pandas as pd
-from .models import Candidate, Location, Position, RunningPosition, CandidateFile
+from celery import shared_task
+from django.conf import settings
+
+from .models import (Candidate, CandidateFile, Location, Position,
+                     RunningPosition)
 
 
 @shared_task
@@ -11,7 +12,8 @@ def add_candidates_to_db(saved_file_id, parties, year):
   
     file = CandidateFile.objects.get(id=saved_file_id)
     try:
-        reader = pd.read_excel(file.file.url)
+        candidates_locations = pd.read_excel(file.file.url, 'Sheet1')
+        candidates_informations = pd.read_excel(file.file.url, 'Sheet2')
         
         
         # if file_extension == '.xlsx':   
@@ -21,7 +23,7 @@ def add_candidates_to_db(saved_file_id, parties, year):
         location_ids = []
         
         # reader = json.loads(reader_)
-        for _, row in reader.iterrows():
+        for _, row in candidates_locations.iterrows():
             
             try:
                 location_id = Location.objects.get(polling_unit_code=row['PUCODE'])
@@ -69,6 +71,28 @@ def add_candidates_to_db(saved_file_id, parties, year):
                     single_candidate.location.set(location_ids)
                     single_candidate.position.add(running_position)
                     single_candidate.save()
+        
+        
+        for _,row in candidates_informations.iterrows():
+            try:
+                candidate = Candidate.objects.get(name=row['NAME'])
+                candidate.age = row['AGE']
+                
+                if row['GENDER'] == 'M':
+                    candidate.gender = 'Male'
+                candidate.gender = 'Female'
+                candidate.qualifications = row['QUALIFICATION']
+                candidate.candidate_image = row.get('CANDIDATE IMAGE')
+                candidate.party_image = row.get('PARTY IMAGE')
+                candidate.save()
+                
+            except:
+              file.message = 'Failed to upload names: '+ str(e)
+              file.status =  'Failed'
+              file.save()
+              raise Exception('Failed to upload names: '+ str(e))
+            
+        
         file.message = 'Data upload Successful'
         file.status =  'Success'
         file.save()             
