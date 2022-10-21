@@ -86,11 +86,12 @@ def add_candidates_to_db(saved_file_id, parties, year):
                 candidate.party_image = row.get('PARTY IMAGE')
                 candidate.save()
                 
-            except:
-              file.message = 'Failed to upload names: '+ str(e)
-              file.status =  'Failed'
-              file.save()
-              raise Exception('Failed to upload names: '+ str(e))
+            except Exception as error:
+                pass
+            #   file.message = 'Failed to upload names: '+ str(error)
+            #   file.status =  'Failed'
+            #   file.save()
+            #   raise Exception('Failed to upload names: '+ str(error))
             
         
         file.message = 'Data upload Successful'

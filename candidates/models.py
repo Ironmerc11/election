@@ -29,6 +29,9 @@ class Location(models.Model):
 
 class Position(models.Model):
     name = models.CharField(max_length=200)
+    
+    def __str__(self):
+        self.name
 
 class RunningPosition(models.Model):
     position = models.ForeignKey(Position, on_delete=models.CASCADE)
