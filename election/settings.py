@@ -34,7 +34,8 @@ DEBUG = env('DEBUG')
 
 ALLOWED_HOSTS = [
    "138.68.172.75",
-   '127.0.0.1'
+   '127.0.0.1',
+   'api.knowyourcandidate.ng'
 ]
 
 
