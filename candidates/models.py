@@ -40,28 +40,26 @@ class RunningPosition(models.Model):
     def __str__(self):
         return self.position.name
 
+class Party(models.Model):
+    name = models.CharField(max_length=200)
+    image = models.ImageField(null=True)
+    
+    def __str__(self):
+        return self.name
+
 class Candidate(models.Model):
     
     GENDER_CHOICES = [
         ('Male', 'Male'),
         ('Female', 'Female'),
         ]
-    # QUALIFICATION_CHOICES = [
-    #     ('Doctorate Degree','Doctorate Degree'),
-    #     ('Masters Degree', 'Masters Degree'),
-    #     ('Honours Degree','Honours Degree'),
-    #     ('Bachelors Degree','Bachelors Degree'),
-    #     ('National Diploma','National Diploma'),
-    #     ('Higher Certificate','Higher Certificate')
-    # ]
     position = models.ManyToManyField(RunningPosition)
     name = models.CharField(max_length=250)
     candidate_image = models.URLField( null=True)
-    party_image = models.URLField( null=True)
+    party = models.ForeignKey(Party, on_delete=models.SET_NULL, null=True)
     age = models.PositiveIntegerField(null=True)
     gender = models.CharField(max_length=6, choices=GENDER_CHOICES, default='Male',)
     qualifications = models.CharField(max_length=250, null=True)
-    party = models.CharField(max_length=100, null=True)
     location = models.ManyToManyField(Location)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

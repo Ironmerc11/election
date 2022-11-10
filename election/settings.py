@@ -35,7 +35,8 @@ DEBUG = env('DEBUG')
 ALLOWED_HOSTS = [
    "138.68.172.75",
    '127.0.0.1',
-   'api.knowyourcandidate.ng'
+   'api.knowyourcandidate.ng',
+   'kycs-staging.herokuapp.com'
 ]
 
 
@@ -242,8 +243,23 @@ EMAIL_USE_SSL = False
 
 
 
+# CORS_ALLOWED_ORIGINS = [
+#     "https://example.com",
+#     "https://sub.example.com",
+#     "http://localhost:8080",
+#     "http://127.0.0.1:9000",
+# ]
+
+
+
 
 
 if env('HEROKU') == True:
     import django_heroku 
     django_heroku.settings(locals())
+#     CORS_ALLOWED_ORIGINS = [
+#     "https://example.com",
+#     "https://sub.example.com",
+#     "http://localhost:8080",
+#     "http://127.0.0.1:9000",
+# ]

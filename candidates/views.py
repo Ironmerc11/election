@@ -66,7 +66,8 @@ class ConfirmFileUpload(generics.CreateAPIView):
             reader = pd.read_excel(file)
         elif file_extension == '.csv':
             reader = pd.read_csv(file)
-        headers = ["STATE", "STATECODE", "SENATORIAL DISTRICT", "FEDERAL CONSTITUENCY",	"STATE CONSTITUENCY", "LGA", "LGACODE", "WARD", "WARDCODE", "POLLING UNIT", "PUCODE", "POSITION"]
+        # headers = ["STATE", "STATECODE", "SENATORIAL DISTRICT", "FEDERAL CONSTITUENCY",	"STATE CONSTITUENCY", "LGA", "LGACODE", "WARD", "WARDCODE", "POLLING UNIT", "PUCODE", "POSITION"]
+        headers = ["STATE", "LGA", "WARD", "POLLING UNIT", "PUCODE", "POSITION"]
         for _, row in reader.iterrows():
             for m in headers:
                 if m in row:
@@ -95,7 +96,7 @@ class FileUpload(generics.CreateAPIView):
             reader = pd.read_excel(file, 'Sheet1')
         elif file_extension == '.csv':
             reader = pd.read_csv(file)
-        headers = ["STATE", "STATECODE", "SENATORIAL DISTRICT", "FEDERAL CONSTITUENCY",	"STATE CONSTITUENCY", "LGA", "LGACODE", "WARD", "WARDCODE", "POLLING UNIT", "PUCODE", "POSITION"]
+        headers = ["STATE", "LGA", "WARD", "POLLING UNIT", "PUCODE", "POSITION"]
         column_headers = reader.columns.ravel()
         parties = [item for item in column_headers[1:] if item not in headers]
         for _, row in reader.iterrows():

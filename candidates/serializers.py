@@ -1,6 +1,6 @@
 from dataclasses import field
 from pyexpat import model
-from .models import Candidate, Location, RunningPosition, Position, CandidateFile,ImageUpload
+from .models import Candidate, Location, RunningPosition, Position, CandidateFile,ImageUpload, Party
 from rest_framework import serializers
 
 
@@ -15,9 +15,10 @@ class CandidateSerializer(serializers.ModelSerializer):
         rep = super().to_representation(instance)
         if rep['candidate_image']:
             rep['candidate_image'] = rep['candidate_image'][13:]
-        if rep['party_image']:
-            rep['party_image'] = rep['party_image'][13:]
+        # if rep['party_image']:
+        #     rep['party_image'] = rep['party_image'][13:]
         rep["location"] = LocationSerializer(instance.location.all(), many=True).data
+        rep['party'] = PartySerializer(instance.party).data
         rep["position"] = RunningPositionSerializer(instance.position.all(), many=True).data
         return rep
     
@@ -72,4 +73,12 @@ class ImageUploadSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = ImageUpload
+        fields = '__all__'
+        
+
+
+class PartySerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Party
         fields = '__all__'
