@@ -55,7 +55,7 @@ class Candidate(models.Model):
         ]
     position = models.ManyToManyField(RunningPosition)
     name = models.CharField(max_length=250)
-    candidate_image = models.URLField( null=True)
+    candidate_image = models.ImageField( null=True)
     party = models.ForeignKey(Party, on_delete=models.SET_NULL, null=True)
     age = models.PositiveIntegerField(null=True)
     gender = models.CharField(max_length=6, choices=GENDER_CHOICES, default='Male',)
