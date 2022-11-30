@@ -15,6 +15,7 @@ import os
 from pathlib import Path
 import cloudinary
 from datetime import timedelta
+from .bool import parse
 env = environ.Env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -30,7 +31,7 @@ SECRET_KEY = env('SECRET_KEY')
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env('DEBUG')
+DEBUG = parse(env('DEBUG'))
 
 ALLOWED_HOSTS = [
    "138.68.172.75",
