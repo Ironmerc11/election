@@ -65,8 +65,14 @@ class CandidateFileSerializer(serializers.ModelSerializer):
         
 
 class FileUploadSerializer(serializers.Serializer):
+    TYPE_CHOICES = [
+        ('CandidateData','CD'),
+        ('LocationData', 'LD'),
+    ]
     file = serializers.FileField()
     year = serializers.CharField(allow_blank=True, allow_null=True, required=False)
+    type = serializers.ChoiceField(required=True, choices=TYPE_CHOICES)
+    
     
 
 class ImageUploadSerializer(serializers.ModelSerializer):

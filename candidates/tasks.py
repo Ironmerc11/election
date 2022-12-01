@@ -12,7 +12,7 @@ def add_candidates_to_db(saved_file_id, parties, year):
   
     file = CandidateFile.objects.get(id=saved_file_id)
     try:
-        candidates_locations = pd.read_excel(file.file.url, 'Sheet1')
+        candidates_locations = pd.read_excel(file.file.url)
         # candidates_informations = pd.read_excel(file.file.url, 'Sheet2')
         
         
@@ -47,7 +47,6 @@ def add_candidates_to_db(saved_file_id, parties, year):
             for party_name in parties:
                 party_name_capitalize = party_name.capitalize()
                 party, created = Party.objects.get_or_create(name=party_name_capitalize)
-                print(party, 'jdjd')
                 if row[party_name]:
                     try:
                         single_candidate =  Candidate.objects.get(name=row[party_name])
@@ -74,25 +73,7 @@ def add_candidates_to_db(saved_file_id, parties, year):
                     single_candidate.save()
         
         
-        # for _,row in candidates_informations.iterrows():
-        #     try:
-        #         candidate = Candidate.objects.get(name=row['NAME'])
-        #         candidate.age = row['AGE']
-                
-        #         if row['GENDER'] == 'M':
-        #             candidate.gender = 'Male'
-        #         candidate.gender = 'Female'
-        #         candidate.qualifications = row['QUALIFICATION']
-        #         candidate.candidate_image = row.get('CANDIDATE IMAGE')
-        #         candidate.party_image = row.get('PARTY IMAGE')
-        #         candidate.save()
-                
-        #     except Exception as error:
-        #         pass
-            #   file.message = 'Failed to upload names: '+ str(error)
-            #   file.status =  'Failed'
-            #   file.save()
-            #   raise Exception('Failed to upload names: '+ str(error))
+    
             
         
         file.message = 'Data upload Successful'
@@ -103,3 +84,41 @@ def add_candidates_to_db(saved_file_id, parties, year):
         file.message = 'Failed to upload names: '+ str(e)
         file.status = 'Failed'
         file.save()
+
+
+
+@shared_task
+def add_candidates_data_to_db(saved_file_id):
+    file = CandidateFile.objects.get(id=saved_file_id)
+    try:
+        candidates_details = pd.read_excel(file.file.url)
+        
+        for _,row in candidates_details.iterrows():
+            try:
+                candidate, created = Candidate.objects.get_or_create(name=row['NAME'])
+                age = row['AGE']
+                
+                if type(age) == int:
+                    candidate.age = age
+                else:
+                    candidate.age = 0
+                
+                if row['GENDER'] == 'M':
+                    candidate.gender = 'Male'
+                candidate.gender = 'Female'
+                candidate.qualifications = row['QUALIFICATION']
+                candidate.save() 
+            except Exception as error:
+                file.message = 'Failed to upload details: '+ str(error)
+                file.status =  'Failed'
+                file.save()
+                raise Exception('Failed to upload details: '+ str(error))  
+        file.message = 'Data upload Successful'
+        file.status =  'Success'
+        file.save()         
+    except Exception as error:
+        file.message = 'Failed to upload details: '+ str(error)
+        file.status =  'Failed'
+        file.save()
+        raise Exception('Failed to upload details: '+ str(error))
+    

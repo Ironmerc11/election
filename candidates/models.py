@@ -7,19 +7,19 @@ from cloudinary.models import CloudinaryField
 
 class Location(models.Model):    
     year = models.CharField(max_length=4, null=True)
-    state = models.CharField(max_length=30)
-    state_code = models.CharField(max_length=20)
+    state = models.CharField(max_length=300)
+    state_code = models.CharField(max_length=200)
     senatorial_district = models.CharField(max_length=200)
-    senatorial_district_code = models.CharField(max_length=100, null=True)
+    senatorial_district_code = models.CharField(max_length=1024, null=True)
     federal_constituency =  models.CharField(max_length=200)
-    federal_constituency_code = models.CharField(max_length=100, null=True)
+    federal_constituency_code = models.CharField(max_length=1024, null=True)
     state_constituency =  models.CharField(max_length=200)
-    state_constituency_code = models.CharField(max_length=100, null=True)
+    state_constituency_code = models.CharField(max_length=1024, null=True)
     lga = models.CharField(max_length=200)
     lga_code = models.CharField(max_length=100)
     ward = models.CharField(max_length=200)
     ward_code = models.CharField(max_length=100)
-    polling_unit = models.CharField(max_length=100)
+    polling_unit = models.CharField(max_length=1000)
     polling_unit_code = models.CharField(max_length=50)
     
     
@@ -75,8 +75,14 @@ class CandidateFile(models.Model):
         ('Failed', 'Failed'),
         ('Uploading','Uploading'),
     ]
+    
+    TYPE_CHOICES = [
+        ('CandidateData','CD'),
+        ('LocationData', 'LD'),
+    ]
     uploaded_at = models.DateTimeField(auto_now_add=True)
     file = models.FileField(upload_to='election-csv/')
+    type = models.CharField(choices=TYPE_CHOICES, max_length=14, default='Candidate Data')
     active = models.BooleanField(default=True)
     status = models.CharField(choices=UPLOAD_CHOICES, max_length=50, null=True)
     message = models.CharField(max_length=300, null=True)

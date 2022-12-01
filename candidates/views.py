@@ -19,7 +19,7 @@ from .models import Candidate, CandidateFile, Location, SearchQuery, ImageUpload
 from .serializers import (CandidateFileSerializer, CandidateSerializer,
                           CandidateWithoutLocationSerializer,
                           FileUploadSerializer, LocationSerializer, ImageUploadSerializer)
-from .tasks import add_candidates_to_db
+from .tasks import add_candidates_to_db, add_candidates_data_to_db
 
 
 class CandidateViewset(viewsets.ModelViewSet):
@@ -88,14 +88,27 @@ class FileUpload(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         file = serializer.validated_data['file']
         year = serializer.validated_data.get('year', None)
+        type = serializer.validated_data['type']
+ 
+            
         if not year:
             return Response({"error": f"Kindly input year"}, status.HTTP_400_BAD_REQUEST)
             
         _, file_extension = os.path.splitext(file.name)
-        if file_extension == '.xlsx':   
+        if file_extension == '.xlsx' or file_extension == '.xls':   
             reader = pd.read_excel(file, 'Sheet1')
         elif file_extension == '.csv':
             reader = pd.read_csv(file)
+            
+        if type == 'CandidateData':
+            saved_file = CandidateFile.objects.create(file=file, year=year)
+            saved_file.status = 'Uploading'
+            saved_file.save()
+            add_candidates_data_to_db.delay(saved_file.id)
+            return Response({"message": "Upload successful, the data is being processed in the background"},
+                        status.HTTP_200_OK)
+            
+        
         headers = ["STATE", "LGA", "WARD", "POLLING UNIT", "PUCODE", "POSITION"]
         column_headers = reader.columns.ravel()
         parties = [item for item in column_headers[1:] if item not in headers]
