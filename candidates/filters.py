@@ -7,7 +7,7 @@ from django.db import models
 
 class CandidateFilter(filters.FilterSet):
     def __init__(self, *args, **kwargs):
-        queryset = Candidate.objects.prefetch_related('location')
+        queryset = Candidate.objects.prefetch_related('location').prefetch_related('position')
         kwargs['queryset'] = queryset
         super().__init__(*args, **kwargs)
     
@@ -33,8 +33,8 @@ class CandidateFilter(filters.FilterSet):
     max_age = filters.NumberFilter(field_name="age", lookup_expr='lte')
     
     
-    def filter_queryset(self, queryset):
-        return super(CandidateFilter, self).filter_queryset(queryset).distinct()
+    # def filter_queryset(self, queryset):
+    #     return super(CandidateFilter, self).filter_queryset(queryset).distinct()
     
     def filter_queryset(self, queryset):
         """
@@ -45,7 +45,7 @@ class CandidateFilter(filters.FilterSet):
         applied to the queryset before it is cached.
         """
         for name, value in self.form.cleaned_data.items():
-            queryset = self.filters[name].filter(queryset, value).prefetch_related('location')
+            queryset = self.filters[name].filter(queryset, value).distinct().prefetch_related('location').prefetch_related('position')
             assert isinstance(
                 queryset, models.QuerySet
             ), "Expected '%s.%s' to return a QuerySet, but got a %s instead." % (
