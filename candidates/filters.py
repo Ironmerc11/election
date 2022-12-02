@@ -28,8 +28,8 @@ class CandidateFilter(filters.FilterSet):
     max_age = filters.NumberFilter(field_name="age", lookup_expr='lte')
     
     
-    # def filter_queryset(self, queryset):
-    #     return super(CandidateFilter, self).filter_queryset(queryset).distinct()
+    def filter_queryset(self, queryset):
+        return super(CandidateFilter, self).filter_queryset(queryset).distinct()
     
 
     class Meta:
