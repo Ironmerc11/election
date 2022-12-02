@@ -6,6 +6,11 @@ from django.db.models import Q
 
 
 class CandidateFilter(filters.FilterSet):
+    def __init__(self, *args, **kwargs):
+        queryset = Candidate.objects.select_related().all()
+        kwargs['queryset'] = queryset
+        super().__init__(*args, **kwargs)
+    
     name = filters.CharFilter(field_name='name', lookup_expr='icontains', method='filter_name', distinct=True)
     state = filters.CharFilter(field_name='location__state',lookup_expr='icontains', distinct=True)
     state_code = filters.CharFilter(field_name='location__state_code', lookup_expr='icontains')
@@ -21,19 +26,20 @@ class CandidateFilter(filters.FilterSet):
     ward_code = filters.CharFilter(field_name='location__ward_code',lookup_expr='icontains')
     polling_unit = filters.CharFilter(field_name='location__polling_unit',lookup_expr='icontains')
     polling_unit_code = filters.CharFilter(field_name='location__polling_unit_code',lookup_expr='icontains')
-    party = filters.CharFilter(lookup_expr='icontains')
+    party = filters.CharFilter(field_name='party__name',lookup_expr='icontains')
     year = filters.CharFilter(field_name='position__year',lookup_expr='icontains')
     position= filters.CharFilter(field_name='position__position__name',lookup_expr='icontains')
     min_age = filters.NumberFilter(field_name="age", lookup_expr='gte')
     max_age = filters.NumberFilter(field_name="age", lookup_expr='lte')
     
     
-    # def filter_queryset(self, queryset):
-    #     return super(CandidateFilter, self).filter_queryset(queryset).distinct()
+    def filter_queryset(self, queryset):
+        return super(CandidateFilter, self).filter_queryset(queryset).distinct()
     
 
     class Meta:
         model = Candidate
+        # fields = [ 'name',  'min_age', 'max_age', 'gender', 'location']
         fields = ['name', 'min_age', 'max_age' ,'gender', 'qualifications', 'location', 'party', 'state', 'senatorial_district', 'federal_constituency', 
                   'state_constituency','lga','ward','polling_unit','position','year','state_code','senatorial_district_code','federal_constituency_code',
                   'state_constituency_code','lga_code','ward_code','polling_unit_code']

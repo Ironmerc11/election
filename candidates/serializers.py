@@ -9,7 +9,7 @@ class CandidateSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Candidate
-        fields = '__all__'
+        # fields = '__all__'
         exclude = ['location']
     
     def to_representation(self, instance):
