@@ -1,13 +1,13 @@
 from .models import Candidate
 from django_filters import rest_framework as filters
 from django.contrib.postgres.search import SearchQuery
-from django.db.models import Q
+from django.db import models
 
 
 
 class CandidateFilter(filters.FilterSet):
     def __init__(self, *args, **kwargs):
-        queryset = Candidate.objects.select_related().all()
+        queryset = Candidate.objects.prefetch_related()
         kwargs['queryset'] = queryset
         super().__init__(*args, **kwargs)
     
@@ -35,6 +35,25 @@ class CandidateFilter(filters.FilterSet):
     
     def filter_queryset(self, queryset):
         return super(CandidateFilter, self).filter_queryset(queryset).distinct()
+    
+    def filter_queryset(self, queryset):
+        """
+        Filter the queryset with the underlying form's `cleaned_data`. You must
+        call `is_valid()` or `errors` before calling this method.
+
+        This method should be overridden if additional filtering needs to be
+        applied to the queryset before it is cached.
+        """
+        for name, value in self.form.cleaned_data.items():
+            queryset = self.filters[name].filter(queryset, value).prefetch_related('location')
+            assert isinstance(
+                queryset, models.QuerySet
+            ), "Expected '%s.%s' to return a QuerySet, but got a %s instead." % (
+                type(self).__name__,
+                name,
+                type(queryset).__name__,
+            )
+        return queryset
     
 
     class Meta:
