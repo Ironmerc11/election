@@ -6,8 +6,8 @@ from django.db.models import Q
 
 
 class CandidateFilter(filters.FilterSet):
-    name = filters.CharFilter(field_name='name', lookup_expr='icontains', method='filter_name')
-    state = filters.CharFilter(field_name='location__state',lookup_expr='icontains')
+    name = filters.CharFilter(field_name='name', lookup_expr='icontains', method='filter_name', distinct=True)
+    state = filters.CharFilter(field_name='location__state',lookup_expr='icontains', distinct=True)
     state_code = filters.CharFilter(field_name='location__state_code', lookup_expr='icontains')
     senatorial_district = filters.CharFilter(field_name='location__senatorial_district', lookup_expr='icontains')
     senatorial_district_code = filters.CharFilter(field_name='location__senatorial_district_code',lookup_expr='icontains')
@@ -28,8 +28,8 @@ class CandidateFilter(filters.FilterSet):
     max_age = filters.NumberFilter(field_name="age", lookup_expr='lte')
     
     
-    def filter_queryset(self, queryset):
-        return super(CandidateFilter, self).filter_queryset(queryset).distinct()
+    # def filter_queryset(self, queryset):
+    #     return super(CandidateFilter, self).filter_queryset(queryset).distinct()
     
 
     class Meta:
