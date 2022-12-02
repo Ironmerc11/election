@@ -7,7 +7,7 @@ from django.db import models
 
 class CandidateFilter(filters.FilterSet):
     def __init__(self, *args, **kwargs):
-        queryset = Candidate.objects.prefetch_related()
+        queryset = Candidate.objects.prefetch_related('location')
         kwargs['queryset'] = queryset
         super().__init__(*args, **kwargs)
     
