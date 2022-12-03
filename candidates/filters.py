@@ -41,8 +41,9 @@ class CandidateFilter(filters.FilterSet):
             # qs = self.get_method(qs)(**{lookup: value})
             if name == 'lga':
                 lga_id = Location.objects.filter(lga=value)[0]
-                return Candidate.objects.filter(location__id=lga_id.id)
-            queryset = self.filters[name].filter(queryset, value).distinct().prefetch_related('location').prefetch_related('position')
+                queryset = Candidate.objects.filter(location__id=lga_id.id)
+            else:
+                queryset = self.filters[name].filter(queryset, value).distinct().prefetch_related('location').prefetch_related('position')
             assert isinstance(
                 queryset, models.QuerySet
             ), "Expected '%s.%s' to return a QuerySet, but got a %s instead." % (
