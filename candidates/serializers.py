@@ -9,8 +9,8 @@ class CandidateSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Candidate
-        # fields = '__all__'
-        exclude = ['location']
+        fields = '__all__'
+        # exclude = ['location']
     
     def to_representation(self, instance):
         rep = super().to_representation(instance)
@@ -18,7 +18,7 @@ class CandidateSerializer(serializers.ModelSerializer):
             rep['candidate_image'] = rep['candidate_image'][13:]
         # if rep['party_image']:
         #     rep['party_image'] = rep['party_image'][13:]
-        # rep["location"] = LocationSerializer(instance.location.all(), many=True).data
+        rep["location"] = LocationSerializer(instance.location.all(), many=True).data
         rep['party'] = PartySerializer(instance.party).data
         rep["position"] = RunningPositionSerializer(instance.position.all(), many=True).data
         return rep
@@ -30,10 +30,10 @@ class CandidateWithoutLocationSerializer(CandidateSerializer):
         model = Candidate
         exclude = ('location', )
     
-    # def to_representation(self, instance):
-    #     rep = super().to_representation(instance)
-    #     del rep["location"] 
-    #     return rep
+    def to_representation(self, instance):
+        rep = super().to_representation(instance)
+        del rep["location"] 
+        return rep
         
 class LocationSerializer(serializers.ModelSerializer):
      

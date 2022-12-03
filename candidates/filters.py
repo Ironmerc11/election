@@ -36,12 +36,19 @@ class CandidateFilter(filters.FilterSet):
         """
         clean_dict = {k: v for k, v in self.form.cleaned_data.items() if v}
         for name, value in clean_dict.items():
-            print(value)
+            # print(value)
             # lookup = "%s__%s" % (self.field_name, self.lookup_expr)
             # qs = self.get_method(qs)(**{lookup: value})
-            if name == 'lga':
-                lga_id = Location.objects.filter(lga=value)[0]
-                queryset = Candidate.objects.filter(location__id=lga_id.id)
+            if name == 'lga':                
+                try:
+                    lga_id = Location.objects.filter(lga__icontains=value)[0]
+                except:
+                  return Candidate.objects.none()
+                candidate_name = clean_dict.get('name')
+                if candidate_name:
+                    queryset = Candidate.objects.filter(location__id=lga_id.id, name__icontains=candidate_name)
+                else:
+                    queryset = Candidate.objects.filter(location__id=lga_id.id)   
             else:
                 queryset = self.filters[name].filter(queryset, value).distinct().prefetch_related('location').prefetch_related('position')
             assert isinstance(
