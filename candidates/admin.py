@@ -24,10 +24,34 @@ from .models import Candidate, Location, Position, RunningPosition, CandidateFil
 #     ordering = ('email',)
 #     filter_horizontal = ('groups', 'user_permissions',)
 
-admin.site.register(Candidate)
+
+class LocationAdmin(admin.ModelAdmin):
+    model = Location
+    list_display = ['polling_unit','polling_unit_code', 'ward', 'lga', 'state', 'year']
+    list_filter = ['polling_unit','polling_unit_code', 'ward', 'lga', 'state', 'year']
+
+
+class CandidateFileAdmin(admin.ModelAdmin):
+    model = CandidateFile
+    list_display = ['uploaded_at', 'type', 'status', 'year']
+    list_filter = ['type', 'uploaded_at', 'status']
+
+
+class SearchQueryAdmin(admin.ModelAdmin):
+    model = SearchQuery
+    list_display = ['filter_combo', 'created_at', 'updated_at']
+
+
+class CandidateAdmin(admin.ModelAdmin):
+    model = Candidate
+    list_display = ['name', 'party', 'gender', 'age', 'created_at', 'updated_at']
+    list_filter = ['party', 'gender', 'age', 'created_at', 'updated_at']
+
+
+admin.site.register(Candidate, CandidateAdmin)
 admin.site.register(Location)
 admin.site.register(Position)
 admin.site.register(RunningPosition)
-admin.site.register(CandidateFile)
-admin.site.register(SearchQuery)
+admin.site.register(CandidateFile, CandidateFileAdmin)
+admin.site.register(SearchQuery, SearchQueryAdmin)
 admin.site.register(Party)

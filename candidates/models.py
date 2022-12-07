@@ -7,7 +7,7 @@ from cloudinary.models import CloudinaryField
 
 class Location(models.Model):    
     year = models.CharField(max_length=4, null=True)
-    state = models.CharField(max_length=300)
+    state = models.CharField(max_length=300, db_index=True)
     state_code = models.CharField(max_length=200)
     senatorial_district = models.CharField(max_length=200)
     senatorial_district_code = models.CharField(max_length=1024, null=True)
@@ -17,13 +17,13 @@ class Location(models.Model):
     state_constituency_code = models.CharField(max_length=1024, null=True)
     lga = models.CharField(max_length=1024, db_index=True)
     lga_code = models.CharField(max_length=100)
-    ward = models.CharField(max_length=1024)
+    ward = models.CharField(max_length=1024, db_index=True)
     ward_code = models.CharField(max_length=100)
-    polling_unit = models.CharField(max_length=1000)
+    polling_unit = models.CharField(max_length=1000, db_index=True)
     polling_unit_code = models.CharField(max_length=50, unique=True, db_index=True)
     
     class Meta:
-        indexes = [models.Index(fields=['polling_unit_code', 'lga']),]
+        indexes = [models.Index(fields=['polling_unit_code', 'lga', 'polling_unit', 'ward','state']),]
     
     
     def __str__(self):
@@ -57,7 +57,7 @@ class Candidate(models.Model):
         ('Female', 'Female'),
         ]
     position = models.ManyToManyField(RunningPosition)
-    name = models.CharField(max_length=250)
+    name = models.CharField(max_length=250, db_index=True)
     candidate_image = models.ImageField( null=True)
     party = models.ForeignKey(Party, on_delete=models.SET_NULL, null=True)
     age = models.PositiveIntegerField(null=True)
@@ -71,6 +71,9 @@ class Candidate(models.Model):
     def __str__(self):
         return self.name    
     
+    
+    class Meta:
+        indexes = [models.Index(fields=['name']),]
 
 class CandidateFile(models.Model):
     UPLOAD_CHOICES = [
