@@ -33,7 +33,7 @@ class LocationAdmin(admin.ModelAdmin):
 
 class CandidateFileAdmin(admin.ModelAdmin):
     model = CandidateFile
-    list_display = ['uploaded_at', 'type', 'status', 'year']
+    list_display = ['file','uploaded_at', 'type', 'status', 'year']
     list_filter = ['type', 'uploaded_at', 'status']
 
 
