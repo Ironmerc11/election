@@ -14,7 +14,7 @@ from rest_framework.response import Response
 from users.permissions import IsAdminOrSuperUser
 
 from .filter_select_fields import get_filter_data
-from .filters import CandidateFilter
+from .filters import CandidateFilter, LocationFilter
 from .models import Candidate, CandidateFile, Location, SearchQuery, ImageUpload
 from .serializers import (CandidateFileSerializer, CandidateSerializer,
                           CandidateWithoutLocationSerializer,
@@ -194,6 +194,9 @@ class LocationView(viewsets.ModelViewSet):
     queryset = Location.objects.all()
     serializer_class = LocationSerializer
     permission_classes = [IsAdminOrSuperUser]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = '__all__'
+    filterset_class = LocationFilter
     
 
 class ImageUploadView(viewsets.ModelViewSet):

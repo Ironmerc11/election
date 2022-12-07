@@ -69,8 +69,18 @@ class CandidateFilter(filters.FilterSet):
         for m in range(0, len(splitted_name)):
             result = result.filter(name__icontains=splitted_name[m])
         return result
+    
     class Meta:
         model = Candidate
         # fields = [ 'name',  'min_age', 'max_age', 'gender', 'location']
-        fields = ['name', 'min_age', 'max_age' ,'gender', 'qualifications', 'party', 'state', 'lga','ward','polling_unit','position','year']
+        fields = ['name', 'min_age', 'max_age' ,'gender', 'qualifications', 'party', 'state', 'lga','ward','polling_unit','position','year', 'location']
         
+
+
+
+class LocationFilter(filters.FilterSet):
+    
+    
+    class Meta:
+        model = Location
+        fields = ['state', 'lga', 'ward', 'polling_unit']
