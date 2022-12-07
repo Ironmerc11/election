@@ -15,12 +15,12 @@ class Location(models.Model):
     federal_constituency_code = models.CharField(max_length=1024, null=True)
     state_constituency =  models.CharField(max_length=200)
     state_constituency_code = models.CharField(max_length=1024, null=True)
-    lga = models.CharField(max_length=200)
+    lga = models.CharField(max_length=1024)
     lga_code = models.CharField(max_length=100)
-    ward = models.CharField(max_length=200)
+    ward = models.CharField(max_length=1024)
     ward_code = models.CharField(max_length=100)
     polling_unit = models.CharField(max_length=1000)
-    polling_unit_code = models.CharField(max_length=50)
+    polling_unit_code = models.CharField(max_length=50, unique=True, db_index=True)
     
     
     def __str__(self):
