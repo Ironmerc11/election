@@ -10,6 +10,7 @@ from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie, vary_on_headers
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, status, views, viewsets
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from users.permissions import IsAdminOrSuperUser
 
@@ -18,7 +19,7 @@ from .filters import CandidateFilter, LocationFilter
 from .models import Candidate, CandidateFile, Location, SearchQuery, ImageUpload
 from .serializers import (CandidateFileSerializer, CandidateSerializer,
                           CandidateWithoutLocationSerializer,
-                          FileUploadSerializer, LocationSerializer, ImageUploadSerializer)
+                          FileUploadSerializer, LocationSerializer,LocationIdSerializer, ImageUploadSerializer)
 from .tasks import add_candidates_to_db, add_candidates_data_to_db
 
 
@@ -52,6 +53,7 @@ class CandidateViewset(viewsets.ModelViewSet):
 
 class CandidateWithoutFullLocation(CandidateViewset):
     serializer_class = CandidateWithoutLocationSerializer
+    
     
 class ConfirmFileUpload(generics.CreateAPIView):
     serializer_class = FileUploadSerializer
@@ -197,6 +199,17 @@ class LocationView(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_fields = '__all__'
     filterset_class = LocationFilter
+    
+    @action(detail=False)
+    def get_ids(self, request):
+        # queryset = self.queryset
+        # print(queryset)
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = LocationIdSerializer(queryset, many=True)
+        final_data = []
+        for m in serializer.data:
+            final_data.append(m.get('id'))
+        return Response(final_data)
     
 
 class ImageUploadView(viewsets.ModelViewSet):

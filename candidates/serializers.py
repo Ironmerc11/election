@@ -26,9 +26,10 @@ class CandidateSerializer(serializers.ModelSerializer):
 class CandidateWithoutLocationSerializer(CandidateSerializer):
     
     
-    class Meta:
-        model = Candidate
-        exclude = ('location', )
+    # class Meta:
+    #     model = Candidate
+    #     # exclude = ('location', )
+    #     fields = ''
     
     def to_representation(self, instance):
         rep = super().to_representation(instance)
@@ -41,6 +42,12 @@ class LocationSerializer(serializers.ModelSerializer):
         model = Location
         fields = '__all__'
         
+        
+class LocationIdSerializer(LocationSerializer):
+    
+    class Meta:
+        model = Location
+        fields = ['id']
 
 class RunningPositionSerializer(serializers.ModelSerializer):
     

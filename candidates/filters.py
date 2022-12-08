@@ -94,6 +94,12 @@ class CandidateFilter(filters.FilterSet):
 
 
 class LocationFilter(filters.FilterSet):
+    state = filters.CharFilter(field_name='state',lookup_expr='icontains', distinct=True)
+    lga = filters.CharFilter(field_name='lga',lookup_expr='icontains', distinct=True)
+    ward = filters.CharFilter(field_name='ward',lookup_expr='icontains', distinct=True)
+    polling_unit = filters.CharFilter(field_name='polling_unit',lookup_expr='icontains', distinct=True)
+
+    
     
     
     class Meta:
