@@ -2,6 +2,7 @@ from .models import Candidate, Location
 from django_filters import rest_framework as filters
 from django.contrib.postgres.search import SearchQuery
 from django.db import models
+from django_filters.widgets import CSVWidget
 
 
 
@@ -23,6 +24,20 @@ class CandidateFilter(filters.FilterSet):
     position= filters.CharFilter(field_name='position__position__name',lookup_expr='icontains')
     min_age = filters.NumberFilter(field_name="age", lookup_expr='gte')
     max_age = filters.NumberFilter(field_name="age", lookup_expr='lte')
+    location = filters.ModelMultipleChoiceFilter(field_name='location', method='filter_location_ids', widget=CSVWidget, queryset=Location.objects.all())
+    
+    def filter_location_ids(self, queryset, name, value):
+        idx = set(self.data.get('location', None))
+        filtered_idx = set()
+        for m in idx:
+            try:
+              filtered_idx.add(int(m))
+            except:
+                pass
+              
+        if value:
+            queryset = queryset.filter(id__in=filtered_idx)
+        return queryset
     
     
     # def filter_queryset(self, queryset):
