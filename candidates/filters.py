@@ -36,7 +36,7 @@ class CandidateFilter(filters.FilterSet):
                 pass
               
         if value:
-            queryset = queryset.filter(id__in=filtered_idx)
+            queryset = queryset.filter(location__id__in=filtered_idx)
         return queryset
     
     
