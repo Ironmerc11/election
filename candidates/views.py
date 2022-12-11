@@ -195,7 +195,7 @@ class SearchQueryView(views.APIView):
 class LocationView(viewsets.ModelViewSet):
     queryset = Location.objects.all()
     serializer_class = LocationSerializer
-    permission_classes = [IsAdminOrSuperUser]
+    # permission_classes = [IsAdminOrSuperUser]
     filter_backends = [DjangoFilterBackend]
     filterset_fields = '__all__'
     filterset_class = LocationFilter
