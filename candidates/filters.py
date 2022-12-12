@@ -27,16 +27,18 @@ class CandidateFilter(filters.FilterSet):
     location = filters.ModelMultipleChoiceFilter(field_name='location', method='filter_location_ids', widget=CSVWidget, queryset=Location.objects.all())
     
     def filter_location_ids(self, queryset, name, value):
-        idx = set(self.data.get('location', None))
+        idx = self.data.get('location', None)
         filtered_idx = set()
-        for m in idx:
-            try:
-              filtered_idx.add(int(m))
-            except:
-                pass
-              
-        if value:
-            queryset = queryset.filter(location__id__in=filtered_idx)
+        if idx:
+            idx = set(idx)
+            for m in idx:
+                try:
+                    filtered_idx.add(int(m))
+                except:
+                    pass
+                
+            if value:
+                queryset = queryset.filter(location__id__in=filtered_idx)
         return queryset
     
     
