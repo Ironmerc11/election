@@ -105,7 +105,8 @@ def add_candidates_data_to_db(saved_file_id):
                 
                 if row['GENDER'] == 'M':
                     candidate.gender = 'Male'
-                candidate.gender = 'Female'
+                else:
+                    candidate.gender = 'Female'
                 candidate.qualifications = row['QUALIFICATION']
                 candidate.save() 
             except Exception as error:
