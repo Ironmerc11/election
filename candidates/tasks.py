@@ -2,17 +2,33 @@
 import pandas as pd
 from celery import shared_task
 from django.conf import settings
+from xlsx2csv import Xlsx2csv
+from io import StringIO
 
 from .models import (Candidate, CandidateFile, Location, Position,
                      RunningPosition, Party)
 
 
-@shared_task
-def add_candidates_to_db(saved_file_id, parties, year):
+def read_excel(path, sheet_name):
+    buffer = StringIO()
+    read_file = pd.read_excel(path, sheet_name=sheet_name)
+    read_file.to_csv (buffer,index = None,header=True)
+    # Xlsx2csv(path, outputencoding="utf-8", sheet_name=sheet_name).convert(buffer)
+    buffer.seek(0)
+    df = pd.read_csv(buffer)
+    return df
+
+
+
+# @shared_task
+def add_candidates_to_db(saved_file_id,df,  parties, year):
   
     file = CandidateFile.objects.get(id=saved_file_id)
     try:
-        candidates_locations = pd.read_excel(file.file.url)
+        # print('got here')
+        # df = pd.read_excel(file.file.url)
+        # print('here')
+        # df = read_excel(path=file.file.url, sheet_name='Sheet1')
         # candidates_informations = pd.read_excel(file.file.url, 'Sheet2')
         
         
@@ -23,7 +39,7 @@ def add_candidates_to_db(saved_file_id, parties, year):
         location_ids = []
         
         # reader = json.loads(reader_)
-        for _, row in candidates_locations.iterrows():
+        for _, row in df.iterrows():
             
             try:
                 location_id = Location.objects.get(polling_unit_code=row['PUCODE'])
@@ -71,11 +87,6 @@ def add_candidates_to_db(saved_file_id, parties, year):
                     single_candidate.location.set(location_ids)
                     single_candidate.position.add(running_position)
                     single_candidate.save()
-        
-        
-    
-            
-        
         file.message = 'Data upload Successful'
         file.status =  'Success'
         file.save()             
@@ -87,13 +98,13 @@ def add_candidates_to_db(saved_file_id, parties, year):
 
 
 
-@shared_task
-def add_candidates_data_to_db(saved_file_id):
+# @shared_task
+def add_candidates_data_to_db(saved_file_id, df):
     file = CandidateFile.objects.get(id=saved_file_id)
     try:
-        candidates_details = pd.read_excel(file.file.url)
+        # candidates_details = pd.read_excel(file.file.url)
         
-        for _,row in candidates_details.iterrows():
+        for _,row in df.iterrows():
             try:
                 candidate, created = Candidate.objects.get_or_create(name=row['NAME'])
                 age = row['AGE']

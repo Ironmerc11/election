@@ -64,7 +64,8 @@ INSTALLED_APPS = [
     # apps
     'users',
     "candidates",
-    "corsheaders"
+    "corsheaders",
+    "django_rq",
     
 ]
 
@@ -244,7 +245,7 @@ EMAIL_USE_SSL = False
 RQ_QUEUES = {  
      'default': {
         'URL': env('REDIS_URL'), # If you're on Heroku
-        'DEFAULT_TIMEOUT':500,
+        'DEFAULT_TIMEOUT':36000,
     },
 }
 

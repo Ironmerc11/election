@@ -13,6 +13,7 @@ from rest_framework import generics, status, views, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from users.permissions import IsAdminOrSuperUser
+import django_rq
 
 from .filter_select_fields import get_filter_data
 from .filters import CandidateFilter, LocationFilter
@@ -20,7 +21,7 @@ from .models import Candidate, CandidateFile, Location, SearchQuery, ImageUpload
 from .serializers import (CandidateFileSerializer, CandidateSerializer,
                           CandidateWithoutLocationSerializer,
                           FileUploadSerializer, LocationSerializer,LocationIdSerializer, ImageUploadSerializer)
-from .tasks import add_candidates_to_db, add_candidates_data_to_db
+from .tasks import add_candidates_to_db, add_candidates_data_to_db, read_excel
 
 
 class CandidateViewset(viewsets.ModelViewSet):
@@ -106,7 +107,9 @@ class FileUpload(generics.CreateAPIView):
             saved_file = CandidateFile.objects.create(file=file, year=year)
             saved_file.status = 'Uploading'
             saved_file.save()
-            add_candidates_data_to_db.delay(saved_file.id)
+            df = read_excel(path=saved_file.file.url, sheet_name='Sheet1')
+            # add_candidates_data_to_db.delay(saved_file.id)
+            django_rq.enqueue(add_candidates_data_to_db, saved_file.id, df)
             return Response({"message": "Upload successful, the data is being processed in the background"},
                         status.HTTP_200_OK)
             
@@ -125,8 +128,9 @@ class FileUpload(generics.CreateAPIView):
         saved_file.status = 'Uploading'
         saved_file.type = type
         saved_file.save()
-        add_candidates_to_db.delay(saved_file.id, parties, year)
-            
+        df = read_excel(path=saved_file.file.url, sheet_name='Sheet1')
+        django_rq.enqueue(add_candidates_to_db, saved_file.id,df, parties, year)
+        # add_candidates_to_db.delay(saved_file.id, parties, year)
         return Response({"message": "Upload successful, the data is being processed in the background"},
                         status.HTTP_200_OK)
 
