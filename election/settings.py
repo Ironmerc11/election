@@ -241,6 +241,13 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 
+RQ_QUEUES = {  
+     'default': {
+        'URL': env('REDIS_URL'), # If you're on Heroku
+        'DEFAULT_TIMEOUT':500,
+    },
+}
+
 
 
 
