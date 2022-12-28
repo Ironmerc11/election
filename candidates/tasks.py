@@ -2,8 +2,8 @@
 import pandas as pd
 from celery import shared_task
 from django.conf import settings
-from xlsx2csv import Xlsx2csv
 from io import StringIO
+import json
 
 from .models import (Candidate, CandidateFile, Location, Position,
                      RunningPosition, Party)
@@ -12,7 +12,7 @@ from .models import (Candidate, CandidateFile, Location, Position,
 def read_excel(path, sheet_name):
     buffer = StringIO()
     read_file = pd.read_excel(path, sheet_name=sheet_name)
-    read_file.to_csv (buffer,index = None,header=True)
+    read_file.to_csv(buffer,index = None,header=True)
     # Xlsx2csv(path, outputencoding="utf-8", sheet_name=sheet_name).convert(buffer)
     buffer.seek(0)
     df = pd.read_csv(buffer)
@@ -21,13 +21,11 @@ def read_excel(path, sheet_name):
 
 
 # @shared_task
-def add_candidates_to_db(saved_file_id,df,  parties, year):
+def add_candidates_to_db(saved_file_id, df,  parties, year):
   
     file = CandidateFile.objects.get(id=saved_file_id)
     try:
-        # print('got here')
         # df = pd.read_excel(file.file.url)
-        # print('here')
         # df = read_excel(path=file.file.url, sheet_name='Sheet1')
         # candidates_informations = pd.read_excel(file.file.url, 'Sheet2')
         
@@ -37,10 +35,7 @@ def add_candidates_to_db(saved_file_id,df,  parties, year):
         # elif file_extension == '.csv':
         #     reader = pd.read_csv(file)
         location_ids = []
-        
-        # reader = json.loads(reader_)
-        for _, row in df.iterrows():
-            
+        for row in df:
             try:
                 location_id = Location.objects.get(polling_unit_code=row['PUCODE'])
                 location_ids.append(location_id)
@@ -49,12 +44,7 @@ def add_candidates_to_db(saved_file_id,df,  parties, year):
                 location_id = Location.objects.create(
                     year=year,
                     state=row["STATE"],
-                    # state_code=row["STATECODE"],
-                    # senatorial_district=row["SENATORIAL DISTRICT"],
-                    # federal_constituency= row["FEDERAL CONSTITUENCY"],
-                    # state_constituency=row["STATE CONSTITUENCY"],
                     lga=row["LGA"],
-                    # lga_code=row["LGACODE"],
                     ward=row["WARD"],
                     polling_unit=row["POLLING UNIT"],
                     polling_unit_code=row["PUCODE"]      

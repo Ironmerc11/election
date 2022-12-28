@@ -129,7 +129,10 @@ class FileUpload(generics.CreateAPIView):
         saved_file.type = type
         saved_file.save()
         df = read_excel(path=saved_file.file.url, sheet_name='Sheet1')
-        django_rq.enqueue(add_candidates_to_db, saved_file.id,df, parties, year)
+        out = df.to_dict(orient='records')
+        # df_json = json.loads(out)
+        # print(out)
+        django_rq.enqueue(add_candidates_to_db, saved_file.id, out, parties, year)
         # add_candidates_to_db.delay(saved_file.id, parties, year)
         return Response({"message": "Upload successful, the data is being processed in the background"},
                         status.HTTP_200_OK)
