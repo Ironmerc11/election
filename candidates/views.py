@@ -123,6 +123,7 @@ class FileUpload(generics.CreateAPIView):
         
         saved_file = CandidateFile.objects.create(file=file, year=year)
         saved_file.status = 'Uploading'
+        saved_file.type = type
         saved_file.save()
         add_candidates_to_db.delay(saved_file.id, parties, year)
             
@@ -216,3 +217,8 @@ class ImageUploadView(viewsets.ModelViewSet):
     queryset = ImageUpload.objects.all()
     serializer_class = ImageUploadSerializer
     permission_classes = [IsAdminOrSuperUser]
+    
+    
+    
+    
+    
