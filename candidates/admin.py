@@ -47,9 +47,14 @@ class CandidateAdmin(admin.ModelAdmin):
     list_display = ['name', 'party', 'gender', 'age', 'created_at', 'updated_at']
     list_filter = ['party', 'gender', 'age', 'created_at', 'updated_at']
 
-
+class LocationAdmin(admin.ModelAdmin):
+    
+    model = Location
+    list_display = ['state', 'lga', 'ward', 'polling_unit', 'polling_unit_code']
+    search_fields = ['polling_unit_code', 'state']
+    
 admin.site.register(Candidate, CandidateAdmin)
-admin.site.register(Location)
+admin.site.register(Location, LocationAdmin)
 admin.site.register(Position)
 admin.site.register(RunningPosition)
 admin.site.register(CandidateFile, CandidateFileAdmin)

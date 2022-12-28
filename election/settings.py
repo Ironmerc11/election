@@ -245,7 +245,7 @@ EMAIL_USE_SSL = False
 RQ_QUEUES = {  
      'default': {
         'URL': env('REDIS_URL'), # If you're on Heroku
-        'DEFAULT_TIMEOUT':36000,
+        'DEFAULT_TIMEOUT':3600,
     },
 }
 
