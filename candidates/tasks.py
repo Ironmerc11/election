@@ -93,7 +93,8 @@ def add_candidates_to_db(saved_file_id, df,  parties, year):
 
 
 
-@shared_task
+# @shared_task
+@dramatiq.actor
 def add_candidates_data_to_db(saved_file_id, df):
     file = CandidateFile.objects.get(id=saved_file_id)
     try:
