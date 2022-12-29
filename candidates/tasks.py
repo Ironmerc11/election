@@ -34,6 +34,7 @@ def add_candidates_to_db(saved_file_id, df,  parties, year):
         #     reader = pd.read_excel(file)
         # elif file_extension == '.csv':
         #     reader = pd.read_csv(file)
+        count = 0
         location_ids = []
         for row in df:
             try:
@@ -77,6 +78,8 @@ def add_candidates_to_db(saved_file_id, df,  parties, year):
                     single_candidate.location.set(location_ids)
                     single_candidate.position.add(running_position)
                     single_candidate.save()
+                count +=1
+                file.message = f'{count} has been added'
         file.message = 'Data upload Successful'
         file.status =  'Success'
         file.save()             
