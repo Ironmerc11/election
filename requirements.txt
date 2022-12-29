@@ -67,3 +67,5 @@ wcwidth==0.2.5
 whitenoise==6.2.0
 wrapt==1.14.1
 xlsx2csv==0.8.0
+
+dramatiq~=1.13.0

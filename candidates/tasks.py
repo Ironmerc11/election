@@ -4,6 +4,7 @@ from celery import shared_task
 from django.conf import settings
 from io import StringIO
 import json
+import dramatiq
 
 from .models import (Candidate, CandidateFile, Location, Position,
                      RunningPosition, Party)
@@ -20,7 +21,8 @@ def read_excel(path, sheet_name):
 
 
 
-@shared_task
+# @shared_task
+@dramatiq.actor
 def add_candidates_to_db(saved_file_id, df,  parties, year):
   
     file = CandidateFile.objects.get(id=saved_file_id)

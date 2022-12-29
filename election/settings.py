@@ -13,9 +13,9 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 import environ
 import os
 from pathlib import Path
-import cloudinary
 from datetime import timedelta
 from .bool import parse
+
 env = environ.Env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -29,17 +29,15 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env('SECRET_KEY')
 
-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = parse(env('DEBUG'))
 
 ALLOWED_HOSTS = [
-   "138.68.172.75",
-   '127.0.0.1',
-   'api.knowyourcandidate.ng',
-   'kycs-staging.herokuapp.com'
+    "138.68.172.75",
+    '127.0.0.1',
+    'api.knowyourcandidate.ng',
+    'kycs-staging.herokuapp.com'
 ]
-
 
 # Raises Django's ImproperlyConfigured
 # exception if SECRET_KEY not in os.environ
@@ -60,14 +58,15 @@ INSTALLED_APPS = [
     'cloudinary',
     'django_rest_passwordreset',
     'storages',
-    
+
     # apps
     'users',
     "candidates",
     "corsheaders",
     "django_rq",
     'django_celery_results',
-    
+    "django_dramatiq",
+
 ]
 
 MIDDLEWARE = [
@@ -103,14 +102,12 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'election.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
 DATABASES = {
     'default': env.db("DATABASE_URL")
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
@@ -130,7 +127,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
 
@@ -142,7 +138,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
@@ -153,9 +148,7 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
 AUTH_USER_MODEL = "users.User"
-
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -168,7 +161,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 25,
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
-    
+
 }
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
@@ -200,8 +193,6 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 # MEDIA_ROOT = BASE_DIR / 'media'
 
 
-
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
@@ -225,10 +216,8 @@ DEFAULT_FILE_STORAGE = 'custom_storages.MediaStorage'
 MEDIA_URL = '{}/{}/'.format('fra1.digitaloceanspaces.com', 'media')
 MEDIA_ROOT = 'media/'
 
-
 CORS_ORIGIN_ALLOW_ALL = True
-DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240 # higher than the count of fields
-
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240  # higher than the count of fields
 
 # Auth
 AUTHENTICATION_BACKENDS = ['users.auth_backend.EmailBackend']
@@ -243,15 +232,12 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 
-RQ_QUEUES = {  
-     'default': {
-        'URL': env('REDIS_URL'), # If you're on Heroku
-        'DEFAULT_TIMEOUT':3600,
+RQ_QUEUES = {
+    'default': {
+        'URL': env('REDIS_URL'),  # If you're on Heroku
+        'DEFAULT_TIMEOUT': 3600,
     },
 }
-
-
-
 
 # CORS_ALLOWED_ORIGINS = [
 #     "https://example.com",
@@ -261,11 +247,9 @@ RQ_QUEUES = {
 # ]
 
 
-
-
-
 if env('HEROKU') == True:
-    import django_heroku 
+    import django_heroku
+
     django_heroku.settings(locals())
 #     CORS_ALLOWED_ORIGINS = [
 #     "https://example.com",
@@ -284,5 +268,35 @@ CACHES = {
             "CLIENT_CLASS": "django_redis.client.DefaultClient"
         },
         "KEY_PREFIX": "election"
+    }
+}
+
+DRAMATIQ_BROKER = {
+    "BROKER": "dramatiq.brokers.redis.RedisBroker",
+    "OPTIONS": {
+        "url": env('REDIS_URL'),
+    },
+    "MIDDLEWARE": [
+        "dramatiq.middleware.Prometheus",
+        "dramatiq.middleware.AgeLimit",
+        "dramatiq.middleware.TimeLimit",
+        "dramatiq.middleware.Callbacks",
+        "dramatiq.middleware.Retries",
+        "django_dramatiq.middleware.DbConnectionsMiddleware",
+        "django_dramatiq.middleware.AdminMiddleware",
+    ]
+}
+
+# Defines which database should be used to persist Task objects when the
+# AdminMiddleware is enabled.  The default value is "default".
+DRAMATIQ_TASKS_DATABASE = "default"
+
+DRAMATIQ_RESULT_BACKEND = {
+    "BACKEND": "dramatiq.results.backends.redis.RedisBackend",
+    "BACKEND_OPTIONS": {
+        "url": env('REDIS_URL'),
+    },
+    "MIDDLEWARE_OPTIONS": {
+        "result_ttl": 1000 * 60 * 10
     }
 }
