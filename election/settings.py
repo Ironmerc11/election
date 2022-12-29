@@ -66,6 +66,7 @@ INSTALLED_APPS = [
     "candidates",
     "corsheaders",
     "django_rq",
+    'django_celery_results',
     
 ]
 
@@ -272,3 +273,16 @@ if env('HEROKU') == True:
 #     "http://localhost:8080",
 #     "http://127.0.0.1:9000",
 # ]
+
+CELERY_CACHE_BACKEND = 'default'
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": env('REDIS_URL'),
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient"
+        },
+        "KEY_PREFIX": "election"
+    }
+}
