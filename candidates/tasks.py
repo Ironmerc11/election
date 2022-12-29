@@ -20,7 +20,7 @@ def read_excel(path, sheet_name):
 
 
 
-# @shared_task
+@shared_task
 def add_candidates_to_db(saved_file_id, df,  parties, year):
   
     file = CandidateFile.objects.get(id=saved_file_id)
@@ -88,13 +88,13 @@ def add_candidates_to_db(saved_file_id, df,  parties, year):
 
 
 
-# @shared_task
+@shared_task
 def add_candidates_data_to_db(saved_file_id, df):
     file = CandidateFile.objects.get(id=saved_file_id)
     try:
         # candidates_details = pd.read_excel(file.file.url)
         
-        for _,row in df.iterrows():
+        for _,row in df:
             try:
                 candidate, created = Candidate.objects.get_or_create(name=row['NAME'])
                 age = row['AGE']
