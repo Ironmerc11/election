@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Candidate, Location, Position, RunningPosition, CandidateFile,Party, SearchQuery
+from .models import Candidate, Location, Position, RunningPosition, CandidateFile,Party, SearchQuery, ExcelFileData
 
 
 
@@ -47,11 +47,17 @@ class CandidateAdmin(admin.ModelAdmin):
     list_display = ['name', 'party', 'gender', 'age', 'created_at', 'updated_at']
     list_filter = ['party', 'gender', 'age', 'created_at', 'updated_at']
 
-class LocationAdmin(admin.ModelAdmin):
+# class LocationAdmin(admin.ModelAdmin):
     
-    model = Location
-    list_display = ['state', 'lga', 'ward', 'polling_unit', 'polling_unit_code']
-    search_fields = ['polling_unit_code', 'state']
+#     # model = Location
+#     # list_display = ['state', 'lga', 'ward', 'polling_unit', 'polling_unit_code']
+#     # search_fields = ['polling_unit_code', 'state']
+    
+
+class ExcelFileAdmin(admin.ModelAdmin):
+    model = ExcelFileData
+    list_display = ['file_name', 'file_type', 'updated_at', 'created_at']
+
     
 admin.site.register(Candidate, CandidateAdmin)
 admin.site.register(Location, LocationAdmin)
@@ -60,3 +66,4 @@ admin.site.register(RunningPosition)
 admin.site.register(CandidateFile, CandidateFileAdmin)
 admin.site.register(SearchQuery, SearchQueryAdmin)
 admin.site.register(Party)
+admin.site.register(ExcelFileData, ExcelFileAdmin)

@@ -17,7 +17,7 @@ from users.permissions import IsAdminOrSuperUser
 
 from .filter_select_fields import get_filter_data
 from .filters import CandidateFilter, LocationFilter
-from .models import Candidate, CandidateFile, Location, SearchQuery, ImageUpload
+from .models import Candidate, CandidateFile, Location, SearchQuery, ImageUpload, ExcelFileData
 from .serializers import (CandidateFileSerializer, CandidateSerializer,
                           CandidateWithoutLocationSerializer,
                           FileUploadSerializer, LocationSerializer,LocationIdSerializer, ImageUploadSerializer)
@@ -97,7 +97,7 @@ class FileUpload(generics.CreateAPIView):
         if not year:
             return Response({"error": f"Kindly input year"}, status.HTTP_400_BAD_REQUEST)
             
-        _, file_extension = os.path.splitext(file.name)
+        file_name, file_extension = os.path.splitext(file.name)
         if file_extension == '.xlsx' or file_extension == '.xls':   
             reader = pd.read_excel(file, 'Sheet1')
         elif file_extension == '.csv':
@@ -130,10 +130,16 @@ class FileUpload(generics.CreateAPIView):
         saved_file.type = type
         saved_file.save()
         df = read_excel(path=saved_file.file.url, sheet_name='Sheet1')
+        # df = df.dropna()
+        df = df.fillna('')
+        print(df)
         out = df.to_dict(orient='records')
         # df_out = out[0:20]
         # add_candidates_to_db.send(saved_file.id, df, parties, year)
-        add_candidates_to_db.delay(saved_file.id, out, parties, year)
+        # print(parties)
+        # add_candidates_to_db.delay(saved_file.id, out, parties, year)
+        ExcelFileData.objects.create(file_name=file_name, year=year, file_type=type, data=out, parties=parties)
+
         return Response({"message": "Upload successful, the data is being processed in the background"},
                         status.HTTP_200_OK)
 
