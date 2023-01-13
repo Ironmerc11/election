@@ -1,50 +1,42 @@
-from .models import Candidate, Location
 from django_filters import rest_framework as filters
-from django.contrib.postgres.search import SearchQuery
-from django.db import models
 from django_filters.widgets import CSVWidget
 
+from .models import Candidate, Location
 
 
 class CandidateFilter(filters.FilterSet):
-    
-    
-    # def __init__(self, *args, **kwargs):
-    #     queryset = Candidate.objects.prefetch_related('location').prefetch_related('position')
-    #     kwargs['queryset'] = queryset
-    #     super().__init__(*args, **kwargs)
-    
     name = filters.CharFilter(field_name='name', lookup_expr='icontains', method='filter_name', distinct=True)
-    state = filters.CharFilter(field_name='location__state',lookup_expr='icontains', distinct=True)
-    lga = filters.CharFilter(field_name='location__lga',lookup_expr='icontains')
-    ward = filters.CharFilter(field_name='location__ward',lookup_expr='icontains')
-    polling_unit = filters.CharFilter(field_name='location__polling_unit',lookup_expr='icontains')
-    party = filters.CharFilter(field_name='party__name',lookup_expr='icontains')
-    year = filters.CharFilter(field_name='position__year',lookup_expr='icontains')
-    position= filters.CharFilter(field_name='position__position__name',lookup_expr='icontains')
+    state = filters.CharFilter(field_name='location__state', lookup_expr='icontains', distinct=True)
+    lga = filters.CharFilter(field_name='location__lga', lookup_expr='icontains')
+    ward = filters.CharFilter(field_name='location__ward', lookup_expr='icontains')
+    polling_unit = filters.CharFilter(field_name='location__polling_unit', lookup_expr='icontains')
+    party = filters.CharFilter(field_name='party__name', lookup_expr='icontains')
+    year = filters.CharFilter(field_name='position__year', lookup_expr='icontains')
+    position = filters.CharFilter(field_name='position__position__name', lookup_expr='icontains')
     min_age = filters.NumberFilter(field_name="age", lookup_expr='gte')
     max_age = filters.NumberFilter(field_name="age", lookup_expr='lte')
-    location = filters.ModelMultipleChoiceFilter(field_name='location', method='filter_location_ids', widget=CSVWidget, queryset=Location.objects.all())
-    
+    location = filters.ModelMultipleChoiceFilter(field_name='location', method='filter_location_ids', widget=CSVWidget,
+                                                 queryset=Location.objects.all())
+
     def filter_location_ids(self, queryset, name, value):
         idx = self.data.get('location', None)
         filtered_idx = set()
         if idx:
-            idx = set(idx)
+            idx = set(idx.split(","))
+            print(idx)
             for m in idx:
                 try:
                     filtered_idx.add(int(m))
                 except:
                     pass
-                
+
             if value:
                 queryset = queryset.filter(location__id__in=filtered_idx)
         return queryset
-    
-    
+
     # def filter_queryset(self, queryset):
     #     return super(CandidateFilter, self).filter_queryset(queryset).distinct()
-    
+
     # def filter_queryset(self, queryset):
     #     """
     #     Filter the queryset with the underlying form's `cleaned_data`. You must
@@ -78,7 +70,6 @@ class CandidateFilter(filters.FilterSet):
     #             type(queryset).__name__,
     #         )
     #     return queryset
-    
 
     def filter_name(self, queryset, name, value):
         splitted_name = value.split()
@@ -86,24 +77,20 @@ class CandidateFilter(filters.FilterSet):
         for m in range(0, len(splitted_name)):
             result = result.filter(name__icontains=splitted_name[m])
         return result
-    
+
     class Meta:
         model = Candidate
         # fields = [ 'name',  'min_age', 'max_age', 'gender', 'location']
-        fields = ['name', 'min_age', 'max_age' ,'gender', 'qualifications', 'party', 'state', 'lga','ward','polling_unit','position','year', 'location']
-        
-
+        fields = ['name', 'min_age', 'max_age', 'gender', 'qualifications', 'party', 'state', 'lga', 'ward',
+                  'polling_unit', 'position', 'year', 'location']
 
 
 class LocationFilter(filters.FilterSet):
-    state = filters.CharFilter(field_name='state',lookup_expr='icontains', distinct=True)
-    lga = filters.CharFilter(field_name='lga',lookup_expr='icontains', distinct=True)
-    ward = filters.CharFilter(field_name='ward',lookup_expr='icontains', distinct=True)
-    polling_unit = filters.CharFilter(field_name='polling_unit',lookup_expr='icontains', distinct=True)
+    state = filters.CharFilter(field_name='state', lookup_expr='icontains', distinct=True)
+    lga = filters.CharFilter(field_name='lga', lookup_expr='icontains', distinct=True)
+    ward = filters.CharFilter(field_name='ward', lookup_expr='icontains', distinct=True)
+    polling_unit = filters.CharFilter(field_name='polling_unit', lookup_expr='icontains', distinct=True)
 
-    
-    
-    
     class Meta:
         model = Location
         fields = ['state', 'lga', 'ward', 'polling_unit']

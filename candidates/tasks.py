@@ -88,7 +88,7 @@ def add_candidates_to_db():
 
                         try:
                             running_position = RunningPosition.objects.get(position=position, year=file.year)
-                        except:
+                        except RunningPosition.DoesNotExist:
                             running_position = RunningPosition.objects.create(position=position, year=file.year)
                         # for location in location_ids:
                         single_candidate.location.set(location_ids)
@@ -142,3 +142,6 @@ def add_candidates_data_to_db(saved_file_id, df):
         file.status = 'Failed'
         file.save()
         raise Exception('Failed to upload details: ' + str(error))
+
+
+

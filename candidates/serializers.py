@@ -22,18 +22,13 @@ class CandidateSerializer(serializers.ModelSerializer):
         rep['party'] = PartySerializer(instance.party).data
         rep["position"] = RunningPositionSerializer(instance.position.all(), many=True).data
         return rep
-    
+
+
 class CandidateWithoutLocationSerializer(CandidateSerializer):
-    
-    
-    # class Meta:
-    #     model = Candidate
-    #     # exclude = ('location', )
-    #     fields = ''
     
     def to_representation(self, instance):
         rep = super().to_representation(instance)
-        del rep["location"] 
+        del rep["location"]
         return rep
         
 class LocationSerializer(serializers.ModelSerializer):

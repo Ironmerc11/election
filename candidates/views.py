@@ -43,10 +43,10 @@ class CandidateViewset(viewsets.ModelViewSet):
     def finalize_response(self, request, response, *args, **kwargs):
         query_params = dict(request.query_params)
         query_params.pop('page', None)
-        filter_combo = ("+").join(list(query_params.keys()))
+        filter_combo = "+".join(list(query_params.keys()))
         if filter_combo:
             SearchQuery.objects.create(
-                filter_combo = ("+").join(list(query_params.keys())),
+                filter_combo = "+".join(list(query_params.keys())),
                 keywords = list(request.query_params.values())
             )
         return super().finalize_response(request, response, *args, **kwargs)
