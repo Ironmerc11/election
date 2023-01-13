@@ -91,7 +91,8 @@ def add_candidates_to_db():
                         except RunningPosition.DoesNotExist:
                             running_position = RunningPosition.objects.create(position=position, year=file.year)
                         # for location in location_ids:
-                        single_candidate.location.set(location_ids)
+                        # print(location_ids)
+                        single_candidate.location.add(*location_ids)
                         single_candidate.position.add(running_position)
                         single_candidate.save()
             file.message = 'Data upload Successful'
