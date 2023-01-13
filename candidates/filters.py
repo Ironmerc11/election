@@ -34,8 +34,8 @@ class CandidateFilter(filters.FilterSet):
                 queryset = queryset.filter(location__id__in=filtered_idx)
         return queryset
 
-    # def filter_queryset(self, queryset):
-    #     return super(CandidateFilter, self).filter_queryset(queryset).distinct()
+    def filter_queryset(self, queryset):
+        return super(CandidateFilter, self).filter_queryset(queryset).distinct()
 
     # def filter_queryset(self, queryset):
     #     """
