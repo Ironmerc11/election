@@ -41,6 +41,7 @@ def read_excel(path, sheet_name):
 def add_candidates_to_db():
     # file = CandidateFile.objects.get(id=saved_file_id)
     files = ExcelFileData.objects.filter(read=False)
+    count = 0
 
         # df = pd.read_excel(file.file.url)
         # df = read_excel(path=file.file.url, sheet_name='Sheet1')
@@ -51,12 +52,16 @@ def add_candidates_to_db():
         # elif file_extension == '.csv':
         #     reader = pd.read_csv(file)
     location_ids = []
+    candidates = []
     for file in files:
         try:
             for row in file.data:
+
                 try:
+
+                    # Location.objects.get_or_create(poll)
                     location_id = Location.objects.get(polling_unit_code=row['PUCODE'])
-                    location_ids.append(location_id)
+                    # location_ids.append(location_id)
 
                 except Location.DoesNotExist:
                     location_id = Location.objects.create(
@@ -67,34 +72,41 @@ def add_candidates_to_db():
                         polling_unit=row["POLLING UNIT"],
                         polling_unit_code=row["PUCODE"]
                     )
-                    location_ids.append(location_id)
-                for party_name in file.parties:
-                    party_name_capitalize = party_name.capitalize()
-                    party, created = Party.objects.get_or_create(name=party_name_capitalize)
-                    if row[party_name]:
-                        try:
-                            single_candidate = Candidate.objects.get(name=row[party_name])
-                            single_candidate.party = party
-                        except Candidate.DoesNotExist:
-                            single_candidate = Candidate.objects.create(
-                                name=row[party_name],
-                                party=party,
-                            )
+                location_ids.append(location_id)
+                if count <= 0:
+                    for party_name in file.parties:
+                        party_name_capitalize = party_name.capitalize()
+                        party, created = Party.objects.get_or_create(name=party_name_capitalize)
+                        if row[party_name]:
+                            try:
+                                single_candidate = Candidate.objects.get(name=row[party_name])
+                                single_candidate.party = party
+                                single_candidate.save()
+                            except Candidate.DoesNotExist:
+                                single_candidate = Candidate.objects.create(
+                                    name=row[party_name],
+                                    party=party,
+                                )
 
-                        try:
-                            position = Position.objects.get(name=row['POSITION'])
-                        except Position.DoesNotExist:
-                            position = Position.objects.create(name=row['POSITION'])
+                            try:
+                                position = Position.objects.get(name=row['POSITION'])
+                            except Position.DoesNotExist:
+                                position = Position.objects.create(name=row['POSITION'])
 
-                        try:
-                            running_position = RunningPosition.objects.get(position=position, year=file.year)
-                        except RunningPosition.DoesNotExist:
-                            running_position = RunningPosition.objects.create(position=position, year=file.year)
+                            try:
+                                running_position = RunningPosition.objects.get(position=position, year=file.year)
+                            except RunningPosition.DoesNotExist:
+                                running_position = RunningPosition.objects.create(position=position, year=file.year)
+
+                            single_candidate.position.add(running_position)
+                            candidates.append(single_candidate)
+
+                        count += 1
                         # for location in location_ids:
                         # print(location_ids)
-                        single_candidate.location.add(*location_ids)
-                        single_candidate.position.add(running_position)
-                        single_candidate.save()
+
+            for candidate in candidates:
+                candidate.location.add(*location_ids)
             file.message = 'Data upload Successful'
             file.status = 'Success'
             file.read = True

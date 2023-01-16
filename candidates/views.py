@@ -1,8 +1,7 @@
-
 import collections
 from datetime import datetime, timedelta
 import os
-from candidates.utils import flatten_array,array_to_dict
+from candidates.utils import flatten_array, array_to_dict
 from django.utils.timezone import make_aware
 import pandas as pd
 from django.utils.decorators import method_decorator
@@ -20,7 +19,7 @@ from .filters import CandidateFilter, LocationFilter
 from .models import Candidate, CandidateFile, Location, SearchQuery, ImageUpload, ExcelFileData
 from .serializers import (CandidateFileSerializer, CandidateSerializer,
                           CandidateWithoutLocationSerializer,
-                          FileUploadSerializer, LocationSerializer,LocationIdSerializer, ImageUploadSerializer)
+                          FileUploadSerializer, LocationSerializer, LocationIdSerializer, ImageUploadSerializer)
 from .tasks import add_candidates_to_db, add_candidates_data_to_db, read_excel
 
 
@@ -32,13 +31,12 @@ class CandidateViewset(viewsets.ModelViewSet):
     filterset_class = CandidateFilter
     ordering = ['id']
 
-    
     # With cookie: cache requested url for each user for 2 hours
-    @method_decorator(cache_page(60*60*5))
+    @method_decorator(cache_page(60 * 60 * 5))
     @method_decorator(vary_on_cookie)
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
-    
+
     # Used this method to hack the caching and also 
     def finalize_response(self, request, response, *args, **kwargs):
         query_params = dict(request.query_params)
@@ -46,26 +44,26 @@ class CandidateViewset(viewsets.ModelViewSet):
         filter_combo = "+".join(list(query_params.keys()))
         if filter_combo:
             SearchQuery.objects.create(
-                filter_combo = "+".join(list(query_params.keys())),
-                keywords = list(request.query_params.values())
+                filter_combo="+".join(list(query_params.keys())),
+                keywords=list(request.query_params.values())
             )
         return super().finalize_response(request, response, *args, **kwargs)
-  
+
 
 class CandidateWithoutFullLocation(CandidateViewset):
     serializer_class = CandidateWithoutLocationSerializer
-    
-    
+
+
 class ConfirmFileUpload(generics.CreateAPIView):
     serializer_class = FileUploadSerializer
     permission_classes = [IsAdminOrSuperUser]
-    
+
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         file = serializer.validated_data['file']
         _, file_extension = os.path.splitext(file.name)
-        if file_extension == '.xlsx':   
+        if file_extension == '.xlsx':
             reader = pd.read_excel(file)
         elif file_extension == '.csv':
             reader = pd.read_csv(file)
@@ -76,33 +74,34 @@ class ConfirmFileUpload(generics.CreateAPIView):
                 if m in row:
                     pass
                 else:
-                    return Response({"error": f"The File is missing one header, the headers should be in this order {headers}"}, status.HTTP_400_BAD_REQUEST)
-            
+                    return Response(
+                        {"error": f"The File is missing one header, the headers should be in this order {headers}"},
+                        status.HTTP_400_BAD_REQUEST)
+
         return Response({"data": "None"},
                         status.HTTP_200_OK)
-        
+
+
 class FileUpload(generics.CreateAPIView):
     serializer_class = FileUploadSerializer
     permission_classes = [IsAdminOrSuperUser]
-    
-    
+
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         file = serializer.validated_data['file']
         year = serializer.validated_data.get('year', None)
         type = serializer.validated_data['type']
- 
-            
+
         if not year:
             return Response({"error": f"Kindly input year"}, status.HTTP_400_BAD_REQUEST)
-            
+
         file_name, file_extension = os.path.splitext(file.name)
-        if file_extension == '.xlsx' or file_extension == '.xls':   
+        if file_extension == '.xlsx' or file_extension == '.xls':
             reader = pd.read_excel(file, 'Sheet1')
         elif file_extension == '.csv':
             reader = pd.read_csv(file)
-            
+
         if type == 'CandidateData':
             saved_file = CandidateFile.objects.create(file=file, year=year)
             saved_file.status = 'Uploading'
@@ -112,9 +111,8 @@ class FileUpload(generics.CreateAPIView):
             add_candidates_data_to_db.delay(saved_file.id, out)
             # django_rq.enqueue(add_candidates_data_to_db, saved_file.id, df)
             return Response({"message": "Upload successful, the data is being processed in the background"},
-                        status.HTTP_200_OK)
-            
-        
+                            status.HTTP_200_OK)
+
         headers = ["STATE", "LGA", "WARD", "POLLING UNIT", "PUCODE", "POSITION"]
         column_headers = reader.columns.ravel()
         parties = [item for item in column_headers[1:] if item not in headers]
@@ -123,8 +121,10 @@ class FileUpload(generics.CreateAPIView):
                 if m in row:
                     pass
                 else:
-                    return Response({"error": f"The File is missing one header, the headers should be in this order {headers}"}, status.HTTP_400_BAD_REQUEST)
-        
+                    return Response(
+                        {"error": f"The File is missing one header, the headers should be in this order {headers}"},
+                        status.HTTP_400_BAD_REQUEST)
+
         saved_file = CandidateFile.objects.create(file=file, year=year)
         saved_file.status = 'Uploading'
         saved_file.type = type
@@ -132,7 +132,7 @@ class FileUpload(generics.CreateAPIView):
         df = read_excel(path=saved_file.file.url, sheet_name='Sheet1')
         # df = df.dropna()
         df = df.fillna('')
-        print(df)
+        # print(df)
         out = df.to_dict(orient='records')
         # df_out = out[0:20]
         # add_candidates_to_db.send(saved_file.id, df, parties, year)
@@ -143,6 +143,7 @@ class FileUpload(generics.CreateAPIView):
         return Response({"message": "Upload successful, the data is being processed in the background"},
                         status.HTTP_200_OK)
 
+
 class CandidateFiles(viewsets.ModelViewSet):
     queryset = CandidateFile.objects.all()
     serializer_class = CandidateFileSerializer
@@ -150,7 +151,7 @@ class CandidateFiles(viewsets.ModelViewSet):
 
 
 class GetFilterData(views.APIView):
-    
+
     def get(self, request, format=None):
         """
             Get filter data from the db
@@ -162,16 +163,16 @@ class GetFilterData(views.APIView):
         lga = request.query_params.get('lga')
         ward = request.query_params.get('ward')
         polling_unit = request.query_params.get('polling_unit')
-        
-        data = get_filter_data(request.query_params.get('filter'),state,senatorial_district,federal_constituency,
+
+        data = get_filter_data(request.query_params.get('filter'), state, senatorial_district, federal_constituency,
                                state_constituency, lga, ward, polling_unit)
         return Response(data)
-    
+
 
 class SearchQueryView(views.APIView):
     permission_classes = [IsAdminOrSuperUser]
 
-    @method_decorator(cache_page(60*60*5))
+    @method_decorator(cache_page(60 * 60 * 5))
     @method_decorator(vary_on_cookie)
     def get(self, request, format=None):
         period = request.query_params.get('period')
@@ -187,24 +188,24 @@ class SearchQueryView(views.APIView):
             queries = SearchQuery.objects.all()
         else:
             queries = SearchQuery.objects.filter(created_at__range=[startdate, enddate])
-            
-    
+
         filters = queries.count()
         searches_today = flatten_array(list(queries.values_list('keywords', flat=True)))
-        
+
         search_params_list = flatten_array(list(queries.values_list('keywords', flat=True)))
-        filter_params_list = queries.values_list('filter_combo', flat=True) 
-        
+        filter_params_list = queries.values_list('filter_combo', flat=True)
+
         filter_params = array_to_dict(collections.Counter(filter_params_list).most_common(10))
 
         search_params = array_to_dict(collections.Counter(search_params_list).most_common(10))
         res = {
-            "keywords":search_params,
-            "filters":filter_params,
-            "total_filters":filters,
-            "searches":len(searches_today)
+            "keywords": search_params,
+            "filters": filter_params,
+            "total_filters": filters,
+            "searches": len(searches_today)
         }
         return Response(res)
+
 
 class LocationView(viewsets.ModelViewSet):
     queryset = Location.objects.all()
@@ -213,7 +214,7 @@ class LocationView(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_fields = '__all__'
     filterset_class = LocationFilter
-    
+
     @action(detail=False)
     def get_ids(self, request):
         # queryset = self.queryset
@@ -224,10 +225,9 @@ class LocationView(viewsets.ModelViewSet):
         for m in serializer.data:
             final_data.append(m.get('id'))
         return Response(final_data)
-    
+
 
 class ImageUploadView(viewsets.ModelViewSet):
     queryset = ImageUpload.objects.all()
     serializer_class = ImageUploadSerializer
     permission_classes = [IsAdminOrSuperUser]
-    
