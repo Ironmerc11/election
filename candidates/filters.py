@@ -20,22 +20,13 @@ class CandidateFilter(filters.FilterSet):
 
     def filter_location_ids(self, queryset, name, value):
         idx = self.data.get('location', None)
-        filtered_idx = set()
-        if idx:
+        if idx and value:
             idx = set(idx.split(","))
-            print(idx)
-            for m in idx:
-                try:
-                    filtered_idx.add(int(m))
-                except:
-                    pass
-
-            if value:
-                queryset = queryset.filter(location__id__in=filtered_idx)
+            queryset = queryset.filter(location__id__in=idx)
         return queryset
 
-    def filter_queryset(self, queryset):
-        return super(CandidateFilter, self).filter_queryset(queryset).distinct()
+    # def filter_queryset(self, queryset):
+    #     return super(CandidateFilter, self).filter_queryset(queryset).distinct()
 
     # def filter_queryset(self, queryset):
     #     """
