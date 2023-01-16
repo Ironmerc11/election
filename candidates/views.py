@@ -24,7 +24,7 @@ from .tasks import add_candidates_to_db, add_candidates_data_to_db, read_excel
 
 
 class CandidateViewset(viewsets.ModelViewSet):
-    queryset = Candidate.objects.all()
+    queryset = Candidate.objects.all().order_by('id')
     serializer_class = CandidateSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = '__all__'
