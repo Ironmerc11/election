@@ -28,7 +28,8 @@ from .models import Candidate, Location, Position, RunningPosition, CandidateFil
 class LocationAdmin(admin.ModelAdmin):
     model = Location
     list_display = ['polling_unit','polling_unit_code', 'ward', 'lga', 'state', 'year']
-    list_filter = ['polling_unit','polling_unit_code', 'ward', 'lga', 'state', 'year']
+    list_filter = ['state', 'year']
+    search_fields = ['polling_unit','polling_unit_code', 'ward', 'lga', 'state', 'year']
 
 
 class CandidateFileAdmin(admin.ModelAdmin):
