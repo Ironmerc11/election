@@ -9,8 +9,8 @@ def get_filter_data(filter, state, senatorial_district, federal_constituency,
         return sorted(set(Position.objects.all().values_list('name', flat=True)))
     if filter.lower() == 'party':
         return sorted(set(Party.objects.all().values_list('name', flat=True)))
-    if filter.lower() == 'qualification':
-        return sorted(set(Candidate.objects.all().values_list('qualifications', flat=True)))
+    if filter.lower() == 'qualifications':
+        return sorted(set(Candidate.objects.all().exclude(qualifications__isnull=True).exclude(qualifications__exact='').values_list('qualifications', flat=True)))
     if filter.lower() == 'state':
         return sorted((set(Location.objects.all().values_list('state', flat=True))))
     if filter.lower() == 'senatorial_district':
