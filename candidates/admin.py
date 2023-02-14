@@ -47,6 +47,7 @@ class CandidateAdmin(admin.ModelAdmin):
     model = Candidate
     list_display = ['name', 'party', 'gender', 'age', 'created_at', 'updated_at']
     list_filter = ['party', 'gender', 'age', 'created_at', 'updated_at']
+    search_fields = ['name']
 
 # class LocationAdmin(admin.ModelAdmin):
     

@@ -11,10 +11,6 @@ from .models import (Candidate, CandidateFile, Location, Position,
                      RunningPosition, Party, ExcelFileData)
 
 
-# import json
-# import dramatiq
-
-
 def read_excel(path, sheet_name):
     buffer = StringIO()
     read_file = pd.read_excel(path, sheet_name=sheet_name)
@@ -23,16 +19,6 @@ def read_excel(path, sheet_name):
     buffer.seek(0)
     df = pd.read_csv(buffer)
     return df
-
-# @shared_task(name='excel_to_db')
-# def add_candidate_data_to_excel_file_db():
-#     unread_info = ExcelFileData.objects.filter(read=False)
-#
-#     for _ in unread_info:
-#         for row in _.data:
-
-
-
 
 
 
@@ -119,22 +105,28 @@ def add_candidates_to_db():
             file.save()
 
 
-@shared_task
+@shared_task(name='candidate_data_to_db')
 # @dramatiq.actor
 def add_candidates_data_to_db(saved_file_id, df):
     file = CandidateFile.objects.get(id=saved_file_id)
     try:
         # candidates_details = pd.read_excel(file.file.url)
 
-        for _, row in df:
+        for  row in df:
             try:
                 candidate, created = Candidate.objects.get_or_create(name=row['NAME'])
                 age = row['AGE']
 
-                if type(age) == int:
-                    candidate.age = age
-                else:
-                    candidate.age = 0
+                try:
+                    if type(age) == int:
+                        candidate.age = age
+                    elif not age:
+                        candidate.age = 0
+                    else:
+                        candidate.age = int(age)
+                except:
+                  pass
+                
 
                 if row['GENDER'] == 'M':
                     candidate.gender = 'Male'
