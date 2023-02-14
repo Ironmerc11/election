@@ -1,4 +1,4 @@
-from .models import Candidate, Location, Position
+from .models import Candidate, Location, Position, Party
 
 
 def get_filter_data(filter, state, senatorial_district, federal_constituency,
@@ -8,7 +8,7 @@ def get_filter_data(filter, state, senatorial_district, federal_constituency,
     if filter.lower() == 'position':
         return sorted(set(Position.objects.all().values_list('name', flat=True)))
     if filter.lower() == 'party':
-        return sorted(set(Candidate.objects.all().values_list('party', flat=True)))
+        return sorted(set(Party.objects.all().values_list('name', flat=True)))
     if filter.lower() == 'qualification':
         return sorted(set(Candidate.objects.all().values_list('qualifications', flat=True)))
     if filter.lower() == 'state':
