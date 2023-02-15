@@ -11,15 +11,24 @@ class CandidateFilter(filters.FilterSet):
     position = filters.CharFilter(field_name='position__position__name', lookup_expr='icontains')
     min_age = filters.NumberFilter(field_name="age", lookup_expr='gte')
     max_age = filters.NumberFilter(field_name="age", lookup_expr='lte')
+    polling_unit_code = filters.CharFilter(field_name='location__polling_unit_code', method='filter_polling_unit_code', lookup_expr='exact')
     location = filters.ModelMultipleChoiceFilter(field_name='location', method='filter_location_ids', widget=CSVWidget,
                                                  queryset=Location.objects.all())
 
     def filter_location_ids(self, queryset, name, value):
-        # print(queryset)
+
         idx = self.data.get('location', None)
         if idx and value:
             idx = set(idx.split(","))
             queryset = queryset.filter(location__id__in=idx)
+        return queryset
+    
+    def filter_polling_unit_code(self, queryset, name, value):
+        try:
+            location = Location.objects.get(polling_unit_code=value)
+            queryset = queryset.filter(location__id=location.id)
+        except:
+          pass
         return queryset
 
     def filter_queryset(self, queryset):
@@ -34,7 +43,7 @@ class CandidateFilter(filters.FilterSet):
 
     class Meta:
         model = Candidate
-        fields = ['name', 'min_age', 'max_age', 'gender', 'qualifications', 'party', 'position', 'year', 'location']
+        fields = ['name', 'min_age', 'max_age', 'gender', 'qualifications', 'party', 'position', 'year', 'polling_unit_code', 'location',]
 
 
 class LocationFilter(filters.FilterSet):

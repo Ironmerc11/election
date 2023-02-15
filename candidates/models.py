@@ -62,6 +62,7 @@ class Candidate(models.Model):
     gender = models.CharField(max_length=6, choices=GENDER_CHOICES, default='Male', )
     qualifications = models.CharField(max_length=250, null=True)
     location = models.ManyToManyField(Location)
+    brief = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
