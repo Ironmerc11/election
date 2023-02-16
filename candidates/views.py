@@ -32,8 +32,8 @@ class CandidateViewset(viewsets.ModelViewSet):
     ordering = ['id']
 
     # With cookie: cache requested url for each user for 2 hours
-    @method_decorator(cache_page(60 * 60 * 5))
-    @method_decorator(vary_on_cookie)
+    # @method_decorator(cache_page(60 * 60 * 5))
+    # @method_decorator(vary_on_cookie)
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
