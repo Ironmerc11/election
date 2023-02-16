@@ -11,10 +11,11 @@ class CandidateFilter(filters.FilterSet):
     position = filters.CharFilter(field_name='position__position__name', lookup_expr='icontains')
     min_age = filters.NumberFilter(field_name="age", lookup_expr='gte')
     max_age = filters.NumberFilter(field_name="age", lookup_expr='lte')
-    polling_unit_code = filters.CharFilter(field_name='location__polling_unit_code', method='filter_polling_unit_code', lookup_expr='exact')
+    polling_unit_code = filters.CharFilter(field_name='location__polling_unit_code', method='filter_polling_unit_code', lookup_expr='exact', distinct=True)
     location = filters.ModelMultipleChoiceFilter(field_name='location', method='filter_location_ids', widget=CSVWidget,
                                                  queryset=Location.objects.all())
 
+    
     def filter_location_ids(self, queryset, name, value):
 
         idx = self.data.get('location', None)
@@ -28,7 +29,7 @@ class CandidateFilter(filters.FilterSet):
             location = Location.objects.get(polling_unit_code=value)
             queryset = queryset.filter(location__id=location.id)
         except:
-          pass
+          queryset = queryset.none()
         return queryset
 
     def filter_queryset(self, queryset):
