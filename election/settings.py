@@ -159,8 +159,8 @@ REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': (
         'users.renderers.CustomRenderer',
     ),
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 25,
+    # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    # 'PAGE_SIZE': 25,
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
 
 }
@@ -219,6 +219,7 @@ MEDIA_ROOT = 'media/'
 
 CORS_ORIGIN_ALLOW_ALL = True
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240  # higher than the count of fields
+DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880
 
 # Auth
 AUTHENTICATION_BACKENDS = ['users.auth_backend.EmailBackend']
