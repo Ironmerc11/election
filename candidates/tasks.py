@@ -3,8 +3,6 @@ from io import StringIO
 import pandas as pd
 from celery import shared_task
 
-from celery import Celery
-from celery.schedules import crontab
 
 
 from .models import (Candidate, CandidateFile, Location, Position,
@@ -61,7 +59,7 @@ def add_candidates_to_db():
                 location_ids.append(location_id)
                 if count <= 0:
                     for party_name in file.parties:
-                        party_name_capitalize = party_name.capitalize()
+                        party_name_capitalize = party_name.title()
                         party, created = Party.objects.get_or_create(name=party_name_capitalize)
                         if row[party_name]:
                             try:
@@ -88,11 +86,10 @@ def add_candidates_to_db():
                             candidates.append(single_candidate)
 
                         count += 1
-                        # for location in location_ids:
-                        # print(location_ids)
 
             for candidate in candidates:
                 candidate.location.add(*location_ids)
+            location_ids = []
             file.message = 'Data upload Successful'
             file.status = 'Success'
             file.read = True
