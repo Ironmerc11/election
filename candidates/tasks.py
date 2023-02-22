@@ -26,27 +26,15 @@ def add_candidates_to_db():
     # file = CandidateFile.objects.get(id=saved_file_id)
     files = ExcelFileData.objects.filter(read=False)
     count = 0
-
-        # df = pd.read_excel(file.file.url)
-        # df = read_excel(path=file.file.url, sheet_name='Sheet1')
-        # candidates_informations = pd.read_excel(file.file.url, 'Sheet2')
-
-        # if file_extension == '.xlsx':
-        #     reader = pd.read_excel(file)
-        # elif file_extension == '.csv':
-        #     reader = pd.read_csv(file)
-    location_ids = []
     candidates = []
     for file in files:
+        location_ids = []
+        print(location_ids)
         try:
             for row in file.data:
 
                 try:
-
-                    # Location.objects.get_or_create(poll)
                     location_id = Location.objects.get(polling_unit_code=row['PUCODE'])
-                    # location_ids.append(location_id)
-
                 except Location.DoesNotExist:
                     location_id = Location.objects.create(
                         year=file.year,
@@ -59,8 +47,8 @@ def add_candidates_to_db():
                 location_ids.append(location_id)
                 if count <= 0:
                     for party_name in file.parties:
-                        party_name_capitalize = party_name.title()
-                        party, created = Party.objects.get_or_create(name=party_name_capitalize)
+                        party_name_title = party_name.title()
+                        party, created = Party.objects.get_or_create(name=party_name_title)
                         if row[party_name]:
                             try:
                                 single_candidate = Candidate.objects.get(name=row[party_name])
@@ -89,7 +77,6 @@ def add_candidates_to_db():
 
             for candidate in candidates:
                 candidate.location.add(*location_ids)
-            location_ids = []
             file.message = 'Data upload Successful'
             file.status = 'Success'
             file.read = True
