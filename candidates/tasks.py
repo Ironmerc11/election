@@ -25,11 +25,10 @@ def read_excel(path, sheet_name):
 def add_candidates_to_db():
     # file = CandidateFile.objects.get(id=saved_file_id)
     files = ExcelFileData.objects.filter(read=False)
-    count = 0
-    candidates = []
     for file in files:
+        count = 0
+        candidates = []
         location_ids = []
-        print(location_ids)
         try:
             for row in file.data:
 
