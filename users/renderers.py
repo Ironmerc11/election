@@ -6,9 +6,11 @@ class CustomRenderer(JSONRenderer):
     def render(self, data, accepted_media_type=None, renderer_context=None):
         status_code = renderer_context['response'].status_code
         reason = renderer_context['response'].reason_phrase
+        count = len(data)
         response = {
             "status": "success",
             "message": reason,
+            "count": len(data),
             "data": data,
         }
 
