@@ -26,7 +26,7 @@ def add_candidates_to_db():
     # file = CandidateFile.objects.get(id=saved_file_id)
     files = ExcelFileData.objects.filter(read=False)
     for file in files:
-        # count = 0
+        count = 0
         candidates = []
         location_ids = []
         try:
@@ -44,35 +44,35 @@ def add_candidates_to_db():
                         polling_unit_code=row["PUCODE"]
                     )
                 location_ids.append(location_id)
-                # if count <= 0:
-                for party_name in file.parties:
-                    party_name_title = party_name.title()
-                    party, created = Party.objects.get_or_create(name=party_name_title)
-                    if row[party_name]:
-                        try:
-                            single_candidate = Candidate.objects.get(name=row[party_name])
-                            single_candidate.party = party
-                            single_candidate.save()
-                        except Candidate.DoesNotExist:
-                            single_candidate = Candidate.objects.create(
-                                name=row[party_name],
-                                party=party,
-                            )
+                if count <= 0:
+                    for party_name in file.parties:
+                        party_name_title = party_name.title()
+                        party, created = Party.objects.get_or_create(name=party_name_title)
+                        if row[party_name]:
+                            try:
+                                single_candidate = Candidate.objects.get(name=row[party_name])
+                                single_candidate.party = party
+                                single_candidate.save()
+                            except Candidate.DoesNotExist:
+                                single_candidate = Candidate.objects.create(
+                                    name=row[party_name],
+                                    party=party,
+                                )
 
-                        try:
-                            position = Position.objects.get(name=row['POSITION'])
-                        except Position.DoesNotExist:
-                            position = Position.objects.create(name=row['POSITION'])
+                            try:
+                                position = Position.objects.get(name=row['POSITION'])
+                            except Position.DoesNotExist:
+                                position = Position.objects.create(name=row['POSITION'])
 
-                        try:
-                            running_position = RunningPosition.objects.get(position=position, year=file.year)
-                        except RunningPosition.DoesNotExist:
-                            running_position = RunningPosition.objects.create(position=position, year=file.year)
+                            try:
+                                running_position = RunningPosition.objects.get(position=position, year=file.year)
+                            except RunningPosition.DoesNotExist:
+                                running_position = RunningPosition.objects.create(position=position, year=file.year)
 
-                        single_candidate.position.add(running_position)
-                        candidates.append(single_candidate)
+                            single_candidate.position.add(running_position)
+                            candidates.append(single_candidate)
 
-                        # count += 1
+                        count += 1
 
             for candidate in candidates:
                 candidate.location.add(*location_ids)
