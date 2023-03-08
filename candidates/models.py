@@ -56,11 +56,11 @@ class Candidate(models.Model):
     ]
     position = models.ManyToManyField(RunningPosition)
     name = models.CharField(max_length=250, db_index=True)
-    candidate_image = models.ImageField(null=True)
+    candidate_image = models.ImageField(null=True, blank=True)
     party = models.ForeignKey(Party, on_delete=models.SET_NULL, null=True)
     age = models.PositiveIntegerField(null=True)
     gender = models.CharField(max_length=6, choices=GENDER_CHOICES, default='Male', )
-    qualifications = models.CharField(max_length=250, null=True)
+    qualifications = models.CharField(max_length=250, null=True, blank=True)
     location = models.ManyToManyField(Location)
     brief = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
